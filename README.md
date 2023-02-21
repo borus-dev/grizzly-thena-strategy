@@ -1,6 +1,6 @@
 # Grizzly Thena Strategy
 
-![](./Images/bear.png)
+![](./images/bear.png)
 
 ## What you'll find here
 
