@@ -1,0 +1,15 @@
+# Brownie
+__pycache__
+.history
+.hypothesis/
+build/
+reports/
+.env
+.vscode
+
+# Node/npm
+node_modules/
+
+# Work in progress
+tests/
+scripts/
