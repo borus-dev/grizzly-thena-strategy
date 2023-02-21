@@ -194,11 +194,10 @@ contract Strategy is BaseStrategy {
 		_convertToLpToken();
 
 		uint256 amountIn = balanceOfWant();
-
 		if (amountIn > dust) {
 			// Deposit all LP tokens in Thena masterChef
-			depositLpIntoMasterChef();
-			enforceSlippageIn(amountIn, pooledBefore);
+			_depositLpIntoMasterChef();
+			_enforceSlippageIn(amountIn, pooledBefore);
 		}
 	}
 
@@ -216,12 +215,12 @@ contract Strategy is BaseStrategy {
 		if (_amountNeeded > looseAmount) {
 			uint256 toExitAmount = _amountNeeded.sub(looseAmount);
 
-			masterChef.withdraw(toExitAmount);
+			_withdrawLpFromMasterChef(toExitAmount);
 
 			_liquidatedAmount = Math.min(balanceOfWant(), _amountNeeded);
 			_loss = _amountNeeded.sub(_liquidatedAmount);
 
-			enforceSlippageOut(toExitAmount, _liquidatedAmount.sub(looseAmount));
+			_enforceSlippageOut(toExitAmount, _liquidatedAmount.sub(looseAmount));
 		} else {
 			_liquidatedAmount = _amountNeeded;
 		}
@@ -230,11 +229,11 @@ contract Strategy is BaseStrategy {
 	function liquidateAllPositions() internal override returns (uint256 _liquidated) {
 		uint256 eta = estimatedTotalAssets();
 
-		withdrawLpFromMasterChef(balanceOfLPInMasterChef());
+		_withdrawLpFromMasterChef(balanceOfLPInMasterChef());
 
 		_liquidated = balanceOfWant();
 
-		enforceSlippageOut(eta, _liquidated);
+		_enforceSlippageOut(eta, _liquidated);
 	}
 
 	/**
@@ -319,7 +318,7 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Add liquidity to Thena
+	 *  Add liquidity to Thena.
 	 */
 	function _addLiquidity(uint256 lp0Amount, uint256 lp1Amount) internal {
 		IThenaRouter(router).addLiquidity(
@@ -343,7 +342,7 @@ contract Strategy is BaseStrategy {
 	 * @notice
 	 *  Deposits all the LpTokens in masterChef.
 	 */
-	function depositLpIntoMasterChef() internal {
+	function _depositLpIntoMasterChef() internal {
 		uint256 balanceOfLpTokens = balanceOfWant();
 		if (balanceOfLpTokens > 0) {
 			masterChef.deposit(balanceOfLpTokens);
@@ -354,7 +353,7 @@ contract Strategy is BaseStrategy {
 	 * @notice
 	 *  Withdraws a certain amount from masterChef.
 	 */
-	function withdrawLpFromMasterChef(uint256 amount) internal {
+	function _withdrawLpFromMasterChef(uint256 amount) internal {
 		uint256 toWithdraw = Math.min(amount, balanceOfLPInMasterChef());
 		if (toWithdraw > 0) {
 			masterChef.withdraw(toWithdraw);
@@ -377,10 +376,10 @@ contract Strategy is BaseStrategy {
 	 */
 	function _withdrawFromMasterChefAndTransfer(address _to) internal {
 		if (abandonRewards) {
-			withdrawLpFromMasterChef(balanceOfLPInMasterChef());
+			_withdrawLpFromMasterChef(balanceOfLPInMasterChef());
 		} else {
 			_claimRewards();
-			withdrawLpFromMasterChef(balanceOfLPInMasterChef());
+			_withdrawLpFromMasterChef(balanceOfLPInMasterChef());
 			uint256 _thenaRewards = balanceOfReward();
 			IERC20(thenaReward).safeTransfer(_to, _thenaRewards);
 		}
@@ -403,7 +402,7 @@ contract Strategy is BaseStrategy {
 			uint256 profit = total.sub(debt);
 
 			// Withdraw profit from masterChef
-			withdrawLpFromMasterChef(profit);
+			_withdrawLpFromMasterChef(profit);
 		}
 	}
 
@@ -435,7 +434,7 @@ contract Strategy is BaseStrategy {
 	 *  Enforce that amount exited didn't slip beyond our tolerance.
 	 *  Check for positive slippage, just in case.
 	 */
-	function enforceSlippageOut(uint256 _intended, uint256 _actual) internal view {
+	function _enforceSlippageOut(uint256 _intended, uint256 _actual) internal view {
 		uint256 exitSlipped = _intended > _actual ? _intended.sub(_actual) : 0;
 		uint256 maxLoss = _intended.mul(maxSlippageOut).div(basisOne);
 		require(exitSlipped <= maxLoss, "Slipped Out!");
@@ -448,7 +447,7 @@ contract Strategy is BaseStrategy {
 	 *  Enforce that amount exchange from want to LP tokens didn't slip beyond our tolerance.
 	 *  Check for positive slippage, just in case.
 	 */
-	function enforceSlippageIn(uint256 _amountIn, uint256 _pooledBefore) internal view {
+	function _enforceSlippageIn(uint256 _amountIn, uint256 _pooledBefore) internal view {
 		uint256 pooledDelta = balanceOfLPInMasterChef().sub(_pooledBefore);
 		uint256 joinSlipped = _amountIn > pooledDelta ? _amountIn.sub(pooledDelta) : 0;
 		uint256 maxLoss = _amountIn.mul(maxSlippageIn).div(basisOne);
@@ -531,7 +530,7 @@ contract Strategy is BaseStrategy {
 	 *  Manually returns lps in masterChef to the strategy. Used in emergencies.
 	 */
 	function emergencyWithdrawFromMasterChef() external onlyVaultManagers {
-		withdrawLpFromMasterChef(balanceOfLPInMasterChef());
+		_withdrawLpFromMasterChef(balanceOfLPInMasterChef());
 	}
 
 	/**
