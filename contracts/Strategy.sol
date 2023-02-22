@@ -68,8 +68,8 @@ contract Strategy is BaseStrategy {
 		token0 = IERC20(thenaLp.token0());
 		token1 = IERC20(thenaLp.token1());
 
-		maxSlippageIn = 9999;
-		maxSlippageOut = 9999;
+		maxSlippageIn = 1;
+		maxSlippageOut = 1;
 
 		maxReportDelay = 30 days;
 		minProfit = 1e21;
@@ -284,23 +284,27 @@ contract Strategy is BaseStrategy {
 		uint256 wbnbBalance = IERC20(wbnb).balanceOf(address(this));
 
 		if (wbnbBalance > 1e15) {
-			// 1/2 BNB to token0
-			IThenaRouter(router).swapExactTokensForTokens(
-				wbnbBalance.div(2),
-				1,
-				wbnbToToken0Route,
-				address(this),
-				block.timestamp
-			);
-
-			// 1/2 BNB to token1
-			IThenaRouter(router).swapExactTokensForTokens(
-				wbnbBalance.div(2),
-				1,
-				wbnbToToken1Route,
-				address(this),
-				block.timestamp
-			);
+			// If token0 or token1 is wbnb we skip the swap
+			if (address(token0) != wbnb) {
+				// 1/2 BNB to token0
+				IThenaRouter(router).swapExactTokensForTokens(
+					wbnbBalance.div(2),
+					1,
+					wbnbToToken0Route,
+					address(this),
+					block.timestamp
+				);
+			}
+			if (address(token1) != wbnb) {
+				// 1/2 BNB to token1
+				IThenaRouter(router).swapExactTokensForTokens(
+					wbnbBalance.div(2),
+					1,
+					wbnbToToken1Route,
+					address(this),
+					block.timestamp
+				);
+			}
 		}
 
 		// Add liquidity to build the LpToken
@@ -320,13 +324,13 @@ contract Strategy is BaseStrategy {
 	 * @notice
 	 *  Add liquidity to Thena.
 	 */
-	function _addLiquidity(uint256 lp0Amount, uint256 lp1Amount) internal {
+	function _addLiquidity(uint256 token0Amount, uint256 token1Amount) internal {
 		IThenaRouter(router).addLiquidity(
 			address(token0),
 			address(token1),
 			isStable,
-			lp0Amount,
-			lp1Amount,
+			token0Amount,
+			token1Amount,
 			0,
 			0,
 			address(this),
