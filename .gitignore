@@ -12,4 +12,4 @@ node_modules/
 
 # Work in progress
 tests/
-scripts/
+tests/test_pool_balance.py
