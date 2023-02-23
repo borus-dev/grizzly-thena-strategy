@@ -54,6 +54,9 @@ contract Strategy is BaseStrategy {
 	uint256 public minProfit;
 	bool internal forceHarvestTriggerOnce;
 
+	address internal constant voterTHE = 0x981B04CBDCEE0C510D331fAdc7D6836a77085030; // We send some extra THE here
+	uint256 public keepTHE; // Percentage of THE we re-lock for boost (in basis points)
+
 	constructor(
 		address _vault,
 		address _masterChef,
@@ -72,6 +75,8 @@ contract Strategy is BaseStrategy {
 
 		maxReportDelay = 30 days;
 		minProfit = 1e21;
+
+		keepTHE = 2000;
 
 		dust = 10**uint256((ERC20(address(want)).decimals()));
 		rewardDust = 10**uint256((ERC20(address(thenaReward)).decimals()));
@@ -139,6 +144,8 @@ contract Strategy is BaseStrategy {
 	{
 		// Claim THENA rewards
 		_claimRewards();
+		// Send some THENA to voter
+		_sendToVoter();
 		// Swap THENA for wBNB
 		_sellRewards();
 		// Swap wBNB for token0 & token1 and build the LP
@@ -263,6 +270,15 @@ contract Strategy is BaseStrategy {
 				address(this),
 				block.timestamp
 			);
+		}
+	}
+
+	function _sendToVoter() internal {
+		uint256 thenaBalance = balanceOfReward();
+		uint256 sendToVoter = thenaBalance.mul(keepTHE).div(basisOne);
+
+		if (sendToVoter > 0) {
+			IERC20(thenaReward).safeTransfer(voterTHE, sendToVoter);
 		}
 	}
 
@@ -502,6 +518,11 @@ contract Strategy is BaseStrategy {
 	function setDust(uint256 _dust, uint256 _rewardDust) external onlyVaultManagers {
 		dust = _dust;
 		rewardDust = _rewardDust;
+	}
+
+	function setKeep(uint256 _keepTHE) external onlyVaultManagers {
+		require(_keepTHE <= 10_000, "Wrong input");
+		keepTHE = _keepTHE;
 	}
 
 	/**
