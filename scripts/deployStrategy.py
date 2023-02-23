@@ -72,7 +72,7 @@ def deploy(Strategy, deployer, gov ,vault):
 
 
 def addHealthCheck(strategy, gov, deployer):
-    healthCheck = "0x9434543bfe2a40cffae0905192fc02d593257348"
+    healthCheck = "0x72f8ac48eb2a90876b3fa20016d6531319ec7b03"
     strategy.setHealthCheck(healthCheck,{"from":deployer})
     return healthCheck
 
