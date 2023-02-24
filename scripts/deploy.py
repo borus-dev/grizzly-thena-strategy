@@ -65,10 +65,9 @@ def main():
         *deployArgs, {"from": dev}, publish_source=publish_source
     )
 
-# NOTE needed to deploy a healthcheck before
-#     addHealthCheck(strategy, dev)
+    addHealthCheck(strategy, dev)
 
-# def addHealthCheck(strategy, deployer):
-#     healthCheck = "0x72f8ac48eb2a90876b3fa20016d6531319ec7b03"
-#     strategy.setHealthCheck(healthCheck,{"from":deployer})
-#     return healthCheck
+def addHealthCheck(strategy, deployer):
+    healthCheck = "0x7578cc483c4a7b0765e1ab72933877c80f7a1649"
+    strategy.setHealthCheck(healthCheck,{"from":deployer})
+    return healthCheck
