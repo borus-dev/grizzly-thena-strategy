@@ -508,7 +508,7 @@ contract Strategy is BaseStrategy {
 	}
 
 	function setParams(uint256 _maxSlippageIn, uint256 _maxSlippageOut)
-		public
+		external
 		onlyVaultManagers
 	{
 		require(_maxSlippageIn <= basisOne);
