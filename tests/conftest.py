@@ -12,21 +12,44 @@ from deployStrategy import addHealthCheck, deploy
 
 stratConfig = {
     "GHNY_BNB": {
-        "name":"StrategyThenaGHNY",
+        "name":"StrategyThenaGHNY_BNB",
         "masterChef":"0x42EcaE09934DC71af220c84663c0A5C835DD0fC8",
         "token_address": "0xA97E46DC17e2b678e5f049A2670fAe000b57F05E",
         "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
     },
-    "XCAD": {
-        "name":"StrategyThenaGHNY",
-        "masterChef":"0x42EcaE09934DC71af220c84663c0A5C835DD0fC8",
-        "token_address": "0xA97E46DC17e2b678e5f049A2670fAe000b57F05E",
-        "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
+    "XCAD_BUSD": {
+        "name":"StrategyThenaXCAD_BUSD",
+        "masterChef":"0x8395bC73C80a689F57bD987594936E15eA741C45",
+        "token_address": "0x8dDc543CB4Be74D8A4979DcCFC79C18BdEFd2Dad",
+        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673", # No whale
+    },
+    "XCAD_BNB": {
+        "name":"StrategyThenaXCAD_BNB",
+        "masterChef":"0xA6fccd530AE7C4de8bCA9fF28403ea49637780Bf",
+        "token_address": "0x3Ec80A1f547ee6FD5D7FC0DC0C1525Ff343D087C",
+        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673", # No whale
+    },
+    "FEAR_BUSD": {
+        "name":"StrategyThenaFEAR_BUSD",
+        "masterChef":"0xB46Ed247eC20EEF7978a3e7Fa4980F35E9911Dc1",
+        "token_address": "0x7d46E0498e485Ca5E5086E900F14A3fCC8A22ae0",
+        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673", # No whale
+    },
+    "DEI_USDT": {
+        "name":"StrategyThenaDEI_USDT",
+        "masterChef":"0x1520D103D8B366C87A0b273E68a56B5f804c1947",
+        "token_address": "0x5929dbBc11711D2B9e9ca0752393C70De74261F5",
+        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673", # No whale
+    },
+    "DOLA_CUSD": {
+        "name":"StrategyThenaDOLA_CUSD",
+        "masterChef":"0xC2B56de677e6d35327E1Cf3dAF2357f20a4c8692",
+        "token_address": "0x7061F52ed4942021924745D454d722E52e057e03",
+        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
     },
 }
 
-strat = stratConfig["GHNY_BNB"]
-
+strat = stratConfig["FEAR_BUSD"]
 print("strat", strat)
 
 
@@ -91,28 +114,28 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 1 * 10 ** token.decimals()
+    amount = 4 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
-    reserve = accounts.at("0x1c6c2498854662fdeadbc4f14ea2f30ca305104b", force=True)
+    reserve = accounts.at(strat["whale"], force=True)
     token.transfer(user, amount, {"from": reserve})
     yield amount
     
 @pytest.fixture
 def amount2(accounts, token, user2):
-    amount = 0.4 * 10 ** token.decimals()
+    amount = 1 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
-    reserve = accounts.at("0x1c6c2498854662fdeadbc4f14ea2f30ca305104b", force=True)
+    reserve = accounts.at(strat["whale"], force=True)
     token.transfer(user2, amount, {"from": reserve})
     yield amount
 
 @pytest.fixture
 def amount3(accounts, token, user3):
-    amount = 1.2 * 10 ** token.decimals()
+    amount = 2 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
-    reserve = accounts.at("0x2958c114b7dbad13605197be74eb78b58350d6d0", force=True)
+    reserve = accounts.at(strat["whale"], force=True)
     token.transfer(user3, amount, {"from": reserve})
     yield amount
 

@@ -284,7 +284,7 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Swaps half of the BNB for token0 and token1 and adds liquidity.
+	 *  Swaps half of the wbnb for token0 and token1 and adds liquidity.
 	 */
 	function _convertToLpToken() internal {
 		route[] memory wbnbToToken0Route = new route[](1);
@@ -298,7 +298,7 @@ contract Strategy is BaseStrategy {
 		if (wbnbBalance > 1e15) {
 			// If token0 or token1 is wbnb we skip the swap
 			if (address(token0) != wbnb) {
-				// 1/2 BNB to token0
+				// 1/2 wbnb to token0
 				IThenaRouter(router).swapExactTokensForTokens(
 					wbnbBalance.div(2),
 					1,
@@ -308,7 +308,7 @@ contract Strategy is BaseStrategy {
 				);
 			}
 			if (address(token1) != wbnb) {
-				// 1/2 BNB to token1
+				// 1/2 wbnb to token1
 				IThenaRouter(router).swapExactTokensForTokens(
 					wbnbBalance.div(2),
 					1,
@@ -415,6 +415,9 @@ contract Strategy is BaseStrategy {
 
 		IERC20(address(thenaLp)).safeApprove(router, 0);
 		IERC20(address(thenaLp)).safeApprove(router, MAX);
+
+		IERC20(wbnb).safeApprove(router, 0);
+		IERC20(wbnb).safeApprove(router, MAX);
 
 		IERC20(thenaReward).safeApprove(router, 0);
 		IERC20(thenaReward).safeApprove(router, MAX);
