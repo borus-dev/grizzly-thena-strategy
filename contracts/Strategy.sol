@@ -253,7 +253,7 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Swaps THENA for BNB.
+	 *  Swaps THENA for WBNB.
 	 */
 	function _sellRewards() internal {
 		route[] memory thenaToWbnbRoute = new route[](1);
@@ -262,7 +262,7 @@ contract Strategy is BaseStrategy {
 		uint256 thenaRewards = balanceOfReward();
 
 		if (thenaRewards > rewardDust) {
-			// THENA to BNB
+			// THENA to WBNB
 			IThenaRouter(router).swapExactTokensForTokens(
 				thenaRewards,
 				1,
