@@ -10,6 +10,25 @@ sys.path.append( strategyDeploy_dir )
 
 from deployStrategy import addHealthCheck, deploy
 
+stratConfig = {
+    "GHNY_BNB": {
+        "name":"StrategyThenaGHNY",
+        "masterChef":"0x42EcaE09934DC71af220c84663c0A5C835DD0fC8",
+        "token_address": "0xA97E46DC17e2b678e5f049A2670fAe000b57F05E",
+        "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
+    },
+    "XCAD": {
+        "name":"StrategyThenaGHNY",
+        "masterChef":"0x42EcaE09934DC71af220c84663c0A5C835DD0fC8",
+        "token_address": "0xA97E46DC17e2b678e5f049A2670fAe000b57F05E",
+        "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
+    },
+}
+
+strat = stratConfig["GHNY_BNB"]
+
+print("strat", strat)
+
 
 @pytest.fixture
 def gov(accounts):
@@ -57,8 +76,8 @@ def userWithWeth(accounts):
 
 @pytest.fixture
 def token():
-    token_address = "0xA97E46DC17e2b678e5f049A2670fAe000b57F05E"  # address of the ERC-20 used by the strategy/vault (DAI) VolatileV1 AMM - GHNY/WBNB
-    yield Contract.from_explorer(token_address)
+    # address of the ERC-20 used by the strategy/vault (DAI) VolatileV1 AMM - GHNY/WBNB
+    yield Contract.from_explorer(strat["token_address"])
 
 @pytest.fixture
 def thenaReward():
@@ -113,6 +132,15 @@ def weth_amount(user, weth):
     user.transfer(weth, weth_amount)
     yield weth_amount
 
+@pytest.fixture(scope="module")
+def masterChef():
+    masterChef = strat["masterChef"]
+    yield masterChef
+
+@pytest.fixture(scope="module")
+def thenaLp():
+    thenaLp = strat["token_address"]
+    yield thenaLp
 
 @pytest.fixture
 def vault(pm, gov, rewards, guardian, management, token):
@@ -126,10 +154,15 @@ def vault(pm, gov, rewards, guardian, management, token):
     yield vault
 
 @pytest.fixture
-def strategy(strategist, keeper, vault, Strategy, gov):
-    strategy = deployStrategy(Strategy, strategist, gov ,vault)
+def strategy(strategist, keeper, vault, Strategy, gov, masterChef, thenaLp):
+    strategy = strategist.deploy(
+        Strategy,
+        vault,
+        masterChef,
+        thenaLp,
+    )    
+    # strategy = deployStrategy(Strategy, strategist, gov ,vault)
     strategy.setKeeper(keeper)
-    # strategy.setCollectFeesEnabled(True, {"from":gov})
     strategy.setDust(1e17, 1e17, {"from" :gov})
     vault.addStrategy(strategy, 10_000, 0, 2 ** 256 - 1, 0, {"from": gov})
     # addHealthCheck(strategy, gov, gov)
