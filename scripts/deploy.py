@@ -57,8 +57,8 @@ def main():
 
     deployArgs = [
       vault, 
-      "0x42EcaE09934DC71af220c84663c0A5C835DD0fC8", # _masterChef
-      "0xA97E46DC17e2b678e5f049A2670fAe000b57F05E", # _thenaLp
+      "0x1520D103D8B366C87A0b273E68a56B5f804c1947", # _masterChef
+      "0x5929dbBc11711D2B9e9ca0752393C70De74261F5", # _thenaLp
     ]
 
     strategy = Strategy.deploy(

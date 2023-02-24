@@ -253,20 +253,20 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Swaps THENA for BNB.
+	 *  Swaps THENA for BUSD.
 	 */
 	function _sellRewards() internal {
-		route[] memory thenaToWbnbRoute = new route[](1);
-		thenaToWbnbRoute[0] = route(thenaReward, wbnb, false);
+		route[] memory thenaToBusdRoute = new route[](1);
+		thenaToBusdRoute[0] = route(thenaReward, busd, false);
 
 		uint256 thenaRewards = balanceOfReward();
 
 		if (thenaRewards > rewardDust) {
-			// THENA to BNB
+			// THENA to BUSD
 			IThenaRouter(router).swapExactTokensForTokens(
 				thenaRewards,
 				1,
-				thenaToWbnbRoute,
+				thenaToBusdRoute,
 				address(this),
 				block.timestamp
 			);
@@ -284,35 +284,35 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Swaps half of the wbnb for token0 and token1 and adds liquidity.
+	 *  Swaps half of the busd for token0 and token1 and adds liquidity.
 	 */
 	function _convertToLpToken() internal {
-		route[] memory wbnbToToken0Route = new route[](1);
-		wbnbToToken0Route[0] = route(wbnb, address(token0), false);
+		route[] memory busdToToken0Route = new route[](1);
+		busdToToken0Route[0] = route(busd, address(token0), true);
 
-		route[] memory wbnbToToken1Route = new route[](1);
-		wbnbToToken1Route[0] = route(wbnb, address(token1), false);
+		route[] memory busdToToken1Route = new route[](1);
+		busdToToken1Route[0] = route(busd, address(token1), true);
 
-		uint256 wbnbBalance = IERC20(wbnb).balanceOf(address(this));
+		uint256 busdBalance = IERC20(busd).balanceOf(address(this));
 
-		if (wbnbBalance > 1e15) {
-			// If token0 or token1 is wbnb we skip the swap
-			if (address(token0) != wbnb) {
-				// 1/2 wbnb to token0
+		if (busdBalance > 1e18) {
+			// If token0 or token1 is busd we skip the swap
+			if (address(token0) != busd) {
+				// 1/2 busd to token0
 				IThenaRouter(router).swapExactTokensForTokens(
-					wbnbBalance.div(2),
+					busdBalance.div(2),
 					1,
-					wbnbToToken0Route,
+					busdToToken0Route,
 					address(this),
 					block.timestamp
 				);
 			}
-			if (address(token1) != wbnb) {
-				// 1/2 wbnb to token1
+			if (address(token1) != busd) {
+				// 1/2 busd to token1
 				IThenaRouter(router).swapExactTokensForTokens(
-					wbnbBalance.div(2),
+					busdBalance.div(2),
 					1,
-					wbnbToToken1Route,
+					busdToToken1Route,
 					address(this),
 					block.timestamp
 				);
@@ -416,8 +416,8 @@ contract Strategy is BaseStrategy {
 		IERC20(address(thenaLp)).safeApprove(router, 0);
 		IERC20(address(thenaLp)).safeApprove(router, MAX);
 
-		IERC20(wbnb).safeApprove(router, 0);
-		IERC20(wbnb).safeApprove(router, MAX);
+		IERC20(busd).safeApprove(router, 0);
+		IERC20(busd).safeApprove(router, MAX);
 
 		IERC20(thenaReward).safeApprove(router, 0);
 		IERC20(thenaReward).safeApprove(router, MAX);
