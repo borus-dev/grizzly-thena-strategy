@@ -11,5 +11,4 @@ reports/
 node_modules/
 
 # Work in progress
-tests/
 tests/test_pool_balance.py
