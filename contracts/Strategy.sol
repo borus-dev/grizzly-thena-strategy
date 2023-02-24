@@ -146,9 +146,9 @@ contract Strategy is BaseStrategy {
 		_claimRewards();
 		// Send some THENA to voter
 		_sendToVoter();
-		// Swap THENA for wBNB
+		// Swap THENA for BUSD
 		_sellRewards();
-		// Swap wBNB for token0 & token1 and build the LP
+		// Swap BUSD for token0 & token1 and build the LP
 		_convertToLpToken();
 
 		uint256 assets = estimatedTotalAssets();
@@ -508,7 +508,7 @@ contract Strategy is BaseStrategy {
 	}
 
 	function setParams(uint256 _maxSlippageIn, uint256 _maxSlippageOut)
-		public
+		external
 		onlyVaultManagers
 	{
 		require(_maxSlippageIn <= basisOne);
