@@ -57,8 +57,8 @@ def main():
 
     deployArgs = [
       vault, 
-      "0x42EcaE09934DC71af220c84663c0A5C835DD0fC8", # _masterChef
-      "0xA97E46DC17e2b678e5f049A2670fAe000b57F05E", # _thenaLp
+      "0xB46Ed247eC20EEF7978a3e7Fa4980F35E9911Dc1", # _masterChef
+      "0x7d46E0498e485Ca5E5086E900F14A3fCC8A22ae0", # _thenaLp
     ]
 
     strategy = Strategy.deploy(
@@ -66,7 +66,7 @@ def main():
     )
 
     addHealthCheck(strategy, dev)
-    
+
     addStrategy(strategy, vault, dev)
 
 def addHealthCheck(strategy, deployer):
