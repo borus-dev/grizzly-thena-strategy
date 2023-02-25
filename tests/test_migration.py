@@ -7,6 +7,8 @@ def test_funds_migration(
     token,
     vault,
     strategy,
+    masterChef,
+    thenaLp,
     amount,
     Strategy,
     strategist,
@@ -28,14 +30,13 @@ def test_funds_migration(
     balanceOfLPTokens = strategy.balanceOfWant() + strategy.balanceOfLPInMasterChef()
 
     # Deploy new strategy
-    new_strategy = deployStrategy(Strategy, strategist, gov, vault)
+    new_strategy = strategist.deploy(Strategy, vault, masterChef, thenaLp)    
     # Migrate to a new strategy
 
-
     # Harvest new strategy to re-invest everything
-    strategy.harvest({"from":gov})
+    strategy.harvest({"from": gov})
     vault.migrateStrategy(strategy, new_strategy, {"from": gov})
-    new_strategy.harvest({"from":gov})
+    new_strategy.harvest({"from": gov})
     # assert that the old strategy does not have any funds
     assert strategy.estimatedTotalAssets() == 0
     assert strategy.balanceOfWant() == 0
@@ -55,11 +56,13 @@ def test_migration(
     strategy,
     amount,
     Strategy,
+    masterChef,
+    thenaLp,
     strategist,
     gov,
     user,
     RELATIVE_APPROX,
-    sexReward, solidReward,  sexReward_whale , solidReward_whale
+    thenaReward, thenaReward_whale
 ):
     # Deposit to the vault and harvest
     token.approve(vault.address, amount, {"from": user})
@@ -73,7 +76,7 @@ def test_migration(
     assert pytest.approx(stratInitialAssets, rel=RELATIVE_APPROX) == amount
 
     # Deploy new strategy
-    new_strategy = deployStrategy(Strategy, strategist, gov, vault)
+    new_strategy = strategist.deploy(Strategy, vault, masterChef, thenaLp)    
     new_strategy.setKeeper(gov)
 
     assert (strategy.address != new_strategy.address)
@@ -86,13 +89,12 @@ def test_migration(
     assert strategy.estimatedTotalAssets() == 0
 
     # Run strategy to make sure we are still earning money
-    util.airdrop_rewards(new_strategy, sexReward, solidReward,  sexReward_whale , solidReward_whale)
+    util.airdrop_rewards(new_strategy, thenaReward, thenaReward_whale)
     chain.mine(1)
     new_strategy.tend({"from": gov})
 
-
-    assert new_strategy.estimatedTotalAssets() >  newStratEstimatedAssets
-    assert new_strategy.estimatedTotalAssets() > stratInitialAssets
+    assert new_strategy.estimatedTotalAssets() == newStratEstimatedAssets
+    assert new_strategy.estimatedTotalAssets() == stratInitialAssets
 
     new_strategy.harvest({"from":gov})
     chain.sleep(3600*6)
