@@ -15,11 +15,17 @@ stratConfig = {
         "name":"StrategyThenaDEI_USDT",
         "masterChef":"0x1520D103D8B366C87A0b273E68a56B5f804c1947",
         "token_address": "0x5929dbBc11711D2B9e9ca0752393C70De74261F5",
-        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673", # No whale
-    },
+        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
+    }, # NOTE Works
+    "MAI_FRAX": {
+        "name":"StrategyThenaMAI_FRAX",
+        "masterChef":"0x556b0b722cc72369cea0ea9c4726a71fb2d1772d",
+        "token_address": "0x49ad051F4263517BD7204f75123b7C11aF9Fd31C",
+        "whale":"0xb4ce0c954bb129d8039230f701bb6503dca1ee8c",
+    }, # NOTE Works
 }
 
-strat = stratConfig["DEI_USDT"]
+strat = stratConfig["MAI_FRAX"]
 print("strat", strat)
 
 
@@ -84,7 +90,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 1.2 * 10 ** token.decimals()
+    amount = 200 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -93,7 +99,7 @@ def amount(accounts, token, user):
     
 @pytest.fixture
 def amount2(accounts, token, user2):
-    amount = 0.1 * 10 ** token.decimals()
+    amount = 60 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -102,7 +108,7 @@ def amount2(accounts, token, user2):
 
 @pytest.fixture
 def amount3(accounts, token, user3):
-    amount = 0.1 * 10 ** token.decimals()
+    amount = 40 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -156,7 +162,7 @@ def strategy(strategist, keeper, vault, Strategy, gov, masterChef, thenaLp):
     )    
     # strategy = deployStrategy(Strategy, strategist, gov ,vault)
     strategy.setKeeper(keeper)
-    strategy.setDust(1e17, 1e17, {"from" :gov})
+    strategy.setDust(1e15, 1e15, {"from" :gov})
     vault.addStrategy(strategy, 10_000, 0, 2 ** 256 - 1, 0, {"from": gov})
     # addHealthCheck(strategy, gov, gov)
     yield strategy

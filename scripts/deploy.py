@@ -66,8 +66,13 @@ def main():
     )
 
     addHealthCheck(strategy, dev)
+    
+    addStrategy(strategy, vault, dev)
 
 def addHealthCheck(strategy, deployer):
     healthCheck = "0x7578CC483C4a7b0765e1Ab72933877c80f7a1649"
-    strategy.setHealthCheck(healthCheck, {"from":deployer})
+    strategy.setHealthCheck(healthCheck,{"from": deployer})
     return healthCheck
+
+def addStrategy(strategy, vault, deployer):
+    vault.addStrategy(strategy, 10_000, 0, 2 ** 256 - 1, 0, {"from": deployer})
