@@ -65,9 +65,15 @@ stratConfig = {
         "token_address": "0x34B897289fcCb43c048b2Cea6405e840a129E021",
         "whale":"0x87f1f1f22f02c46ea3649a326cafba2c7a1df6b1",
     }, # NOTE Works
+    "TAROT_BNB": {
+        "name":"StrategyThenaTAROT_BNB",
+        "masterChef":"0xf49bff8fb6a0ad43475d28be955e62c10c50a998",
+        "token_address": "0xB2604B72b3Aa4aF8d0419c736de2D261b40ec755",
+        "whale":"0x3c9ee43b96bd5d3a7060ace8c98d75736a1ebc67",
+    }, # NOTE Works
 }
 
-strat = stratConfig["THENA_BUSD"]
+strat = stratConfig["TAROT_BNB"]
 print("strat", strat)
 
 
@@ -132,7 +138,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 80 * 10 ** token.decimals()
+    amount = 0.00000000000001 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -141,7 +147,7 @@ def amount(accounts, token, user):
     
 @pytest.fixture
 def amount2(accounts, token, user2):
-    amount = 40 * 10 ** token.decimals()
+    amount = 0.000000000000003 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -150,7 +156,7 @@ def amount2(accounts, token, user2):
 
 @pytest.fixture
 def amount3(accounts, token, user3):
-    amount = 20 * 10 ** token.decimals()
+    amount = 0.000000000000002 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -204,7 +210,7 @@ def strategy(strategist, keeper, vault, Strategy, gov, masterChef, thenaLp):
     )    
     # strategy = deployStrategy(Strategy, strategist, gov ,vault)
     strategy.setKeeper(keeper)
-    strategy.setDust(1e16, 1e16, {"from" :gov})
+    strategy.setDust(1e2, 1e16, {"from" :gov})
     vault.addStrategy(strategy, 10_000, 0, 2 ** 256 - 1, 0, {"from": gov})
     # addHealthCheck(strategy, gov, gov)
     yield strategy
