@@ -23,6 +23,12 @@ stratConfig = {
         "token_address": "0x49ad051F4263517BD7204f75123b7C11aF9Fd31C",
         "whale":"0xb4ce0c954bb129d8039230f701bb6503dca1ee8c",
     }, # NOTE Works
+    "USDT_FRAX": {
+        "name":"StrategyThenaUSDT_FRAX",
+        "masterChef":"0x4b1f8ac4c46348919b70bcab62443eeafb770aa4",
+        "token_address": "0x8D65dBe7206A768C466073aF0AB6d76f9e14Fc6D",
+        "whale":"0x44e434b0eb83534b697f9c77ef11fb981b637def",
+    }, # NOTE Works
 }
 
 strat = stratConfig["MAI_FRAX"]
