@@ -23,9 +23,15 @@ stratConfig = {
         "token_address": "0x3c552e8aC4473222e3d794ADecFA432Eace85929",
         "whale":"0xd40515d9a6521b579491db5b4c295069f2049d40",
     }, # NOTE Works
+    "MATIC_BUSD": {
+        "name":"StrategyThenaMATIC_BUSD",
+        "masterChef":"0x8da503434f19af7e2eae955f60634b67651049a8",
+        "token_address": "0xEB58A4D07990fF50b9F8289701cBdDf9052570B5",
+        "whale":"0xf4799a4e47d775ab79277720d83ce675c625dddc",
+    }, # NOTE Works
 }
 
-strat = stratConfig["IDIA_BUSD"]
+strat = stratConfig["MATIC_BUSD"]
 print("strat", strat)
 
 
@@ -90,7 +96,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 1 * 10 ** token.decimals()
+    amount = 30 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -99,7 +105,7 @@ def amount(accounts, token, user):
     
 @pytest.fixture
 def amount2(accounts, token, user2):
-    amount = 0.4 * 10 ** token.decimals()
+    amount = 15 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -108,7 +114,7 @@ def amount2(accounts, token, user2):
 
 @pytest.fixture
 def amount3(accounts, token, user3):
-    amount = 0.3 * 10 ** token.decimals()
+    amount = 10 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -162,7 +168,7 @@ def strategy(strategist, keeper, vault, Strategy, gov, masterChef, thenaLp):
     )    
     # strategy = deployStrategy(Strategy, strategist, gov ,vault)
     strategy.setKeeper(keeper)
-    strategy.setDust(1e16, 1e16, {"from" :gov})
+    strategy.setDust(1e10, 1e10, {"from": gov})
     vault.addStrategy(strategy, 10_000, 0, 2 ** 256 - 1, 0, {"from": gov})
     # addHealthCheck(strategy, gov, gov)
     yield strategy
