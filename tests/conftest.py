@@ -83,9 +83,27 @@ stratConfig = {
         "token_address": "0x948c553d8c25ad7bd034086f0aae9a9d3c028b90",
         "whale":"0xdab0e1a3bfe3388ad641a780d0cbe70a6e3af2a6",
     }, # NOTE Works
+    "FIL_BNB": {
+        "name":"StrategyThenaFIL_BNB",
+        "masterChef":"0xb67505085e556765cd5a0c3cde2d15794c3119b5",
+        "token_address": "0x1f06C7E323Bc3A5C94Bb6B760C128830cDF6ADfB",
+        "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
+    }, # NOTE Works
+    "stkBNB_BNB": {
+        "name":"StrategyThenaStkBNB_BNB",
+        "masterChef":"0xf26c84237f6c4a2268ac1d699475d2e07689ffb4",
+        "token_address": "0x2B3510f57365aA17bFF8E6360EA67C136175dC6D",
+        "whale":"0xfb4d6e2601477f03a7e1ba72a44fa6d68d446ad7",
+    }, # NOTE Works
+    "BNBx_BNB": {
+        "name":"StrategyThenaBNBx_BNB",
+        "masterChef":"0x0df5dfe92a0568373da2d705cdb5f68017c4b19a",
+        "token_address": "0x6c83E45fE3Be4A9c12BB28cB5BA4cD210455fb55",
+        "whale":"0x75db63125a4f04e59a1a2ab4acc4fc1cd5daddd5",
+    }, # NOTE Works
 }
 
-strat = stratConfig["DAO_BNB"]
+strat = stratConfig["BNBx_BNB"]
 print("strat", strat)
 
 
@@ -150,7 +168,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 0.36 * 10 ** token.decimals()
+    amount = 3 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -159,7 +177,7 @@ def amount(accounts, token, user):
     
 @pytest.fixture
 def amount2(accounts, token, user2):
-    amount = 0.2 * 10 ** token.decimals()
+    amount = 2 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -168,7 +186,7 @@ def amount2(accounts, token, user2):
 
 @pytest.fixture
 def amount3(accounts, token, user3):
-    amount = 0.1 * 10 ** token.decimals()
+    amount = 1 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -222,7 +240,7 @@ def strategy(strategist, keeper, vault, Strategy, gov, masterChef, thenaLp):
     )    
     # strategy = deployStrategy(Strategy, strategist, gov ,vault)
     strategy.setKeeper(keeper)
-    strategy.setDust(1e16, 1e10, {"from" :gov})
+    strategy.setDust(1e10, 1e10, {"from" :gov})
     vault.addStrategy(strategy, 10_000, 0, 2 ** 256 - 1, 0, {"from": gov})
     # addHealthCheck(strategy, gov, gov)
     yield strategy
