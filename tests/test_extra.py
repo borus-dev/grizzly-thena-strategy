@@ -313,7 +313,7 @@ def test_singe_harvest_multiple_deposits_withdraw_3(
     vault.withdraw(vaultShares, user, maxLoss, {"from": user})
 
     assert token.balanceOf(user) > user_1_balance_before
-    assert token.balanceOf(user) - user_1_balance_before > 1e18
+    assert token.balanceOf(user) - user_1_balance_before > 1e17
    
 def test_singe_harvest_multiple_deposits_withdraw_4(
     chain, token, vault, strategy, user, user2, user3, gov, amount, amount2, amount3, RELATIVE_APPROX

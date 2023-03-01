@@ -11,69 +11,15 @@ sys.path.append( strategyDeploy_dir )
 from deployStrategy import addHealthCheck, deploy
 
 stratConfig = {
-    "GHNY_BNB": {
-        "name":"StrategyThenaGHNY_BNB",
-        "masterChef":"0x42EcaE09934DC71af220c84663c0A5C835DD0fC8",
-        "token_address": "0xA97E46DC17e2b678e5f049A2670fAe000b57F05E",
-        "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
-    }, # NOTE Works
-    "XCAD_BUSD": {
-        "name":"StrategyThenaXCAD_BUSD",
-        "masterChef":"0x8395bC73C80a689F57bD987594936E15eA741C45",
-        "token_address": "0x8dDc543CB4Be74D8A4979DcCFC79C18BdEFd2Dad",
-        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
-    }, # NOTE Works
-    "XCAD_BNB": {
-        "name":"StrategyThenaXCAD_BNB",
-        "masterChef":"0xA6fccd530AE7C4de8bCA9fF28403ea49637780Bf",
-        "token_address": "0x3Ec80A1f547ee6FD5D7FC0DC0C1525Ff343D087C",
-        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
-    }, # NOTE Works
-    "DOLA_CUSD": {
-        "name":"StrategyThenaDOLA_CUSD",
-        "masterChef":"0xC2B56de677e6d35327E1Cf3dAF2357f20a4c8692",
-        "token_address": "0x7061F52ed4942021924745D454d722E52e057e03",
-        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
-    },  # NOTE CUSD does not have pools to switch for BNB only BUSD
-        "DOLA_BNB": {
-        "name":"StrategyThenaDOLA_CUSD",
-        "masterChef":"0xA71bF9252106aB196F0494F5eCe149e71807c1eC",
-        "token_address": "0xc5856601712E8a74d57cdc7a47fB1B41C1a6Fae2",
-        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
-    },  # NOTE No whale available
-    "DEUS_BNB": {
-        "name":"StrategyThenaDEUS_BNB",
-        "masterChef":"0x04034f879a737233bf0ef278b50fd06cc70c87e4",
-        "token_address": "0xC8Da40f8A354530F04CE2dDe98Ebc2960a9eA449",
-        "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
-    }, # NOTE Works
-    "MULTI_BNB": {
-        "name":"StrategyThenaMULTI_BNB",
-        "masterChef":"0x8e89554687Aa59763362a32Da0117D70a72f568B",
-        "token_address": "0x075E794F631eE81df1aadB510aC6Ec8803B0FA35",
-        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
-    }, # NOTE Works
-    "THENA_BNB": {
-        "name":"StrategyThenaTHENA_BNB",
-        "masterChef":"0x638b0cc37ffe5a040079F75Ae6C50C9A386dDCaF",
-        "token_address": "0x63Db6ba9E512186C2FAaDaCEF342FB4A40dc577c",
-        "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
-    }, # NOTE Works
-    "THENA_BUSD": {
-        "name":"StrategyThenaTHENA_BUSD",
-        "masterChef":"0x8a8Ec422Fc51B2A88dD5BE489C40aAF1E1fa73d0",
-        "token_address": "0x34B897289fcCb43c048b2Cea6405e840a129E021",
-        "whale":"0x87f1f1f22f02c46ea3649a326cafba2c7a1df6b1",
-    }, # NOTE Works
-    "TAROT_BNB": {
-        "name":"StrategyThenaTAROT_BNB",
-        "masterChef":"0xf49bff8fb6a0ad43475d28be955e62c10c50a998",
-        "token_address": "0xB2604B72b3Aa4aF8d0419c736de2D261b40ec755",
-        "whale":"0x3c9ee43b96bd5d3a7060ace8c98d75736a1ebc67",
+    "ETH_frxETH": {
+        "name":"StrategyThenaETH_frxETH",
+        "masterChef":"0x33a357fad7dd41692f2403b919225f0624ea50ff",
+        "token_address": "0x8A420aACA0c92e3f97CDcFdd852e01Ac5b609452",
+        "whale":"0xa0b5fba97d47af642c06655a3ace103b1bc3bf7e",
     }, # NOTE Works
 }
 
-strat = stratConfig["TAROT_BNB"]
+strat = stratConfig["ETH_frxETH"]
 print("strat", strat)
 
 
@@ -138,7 +84,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 0.00000000000001 * 10 ** token.decimals()
+    amount = 0.007 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -147,7 +93,7 @@ def amount(accounts, token, user):
     
 @pytest.fixture
 def amount2(accounts, token, user2):
-    amount = 0.000000000000003 * 10 ** token.decimals()
+    amount = 0.002 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -156,7 +102,7 @@ def amount2(accounts, token, user2):
 
 @pytest.fixture
 def amount3(accounts, token, user3):
-    amount = 0.000000000000002 * 10 ** token.decimals()
+    amount = 0.001 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -210,7 +156,7 @@ def strategy(strategist, keeper, vault, Strategy, gov, masterChef, thenaLp):
     )    
     # strategy = deployStrategy(Strategy, strategist, gov ,vault)
     strategy.setKeeper(keeper)
-    strategy.setDust(1e2, 1e16, {"from" :gov})
+    strategy.setDust(1e10, 1e10, {"from" :gov})
     vault.addStrategy(strategy, 10_000, 0, 2 ** 256 - 1, 0, {"from": gov})
     # addHealthCheck(strategy, gov, gov)
     yield strategy
