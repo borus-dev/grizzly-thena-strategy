@@ -31,7 +31,7 @@ contract Strategy is BaseStrategy {
 	address internal constant wbnb = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // WBNB
 	address public constant thenaReward = address(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11); // THENA
 	address internal constant busd = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56); // BUSD
-	address internal constant eth = address(0x2170Ed0880ac9A755fd29B2688956BD959F933F8); // ETH
+	address internal constant dola = address(0x2F29Bc0FFAF9bff337b31CBe6CB5Fb3bf12e5840); // DOLA
 
 	address public constant router = address(0x20a304a7d126758dfe6B243D0fc515F83bCA8431); // Thena Router
 	ILpDepositor public masterChef; // {masterChef} - Depositor contract for Thena
@@ -287,11 +287,11 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Swaps half of the wBNB for ETH.
+	 *  Swaps half of the wBNB for DOLA.
 	 */
 	function _convertToIntermediate() internal {
-		route[] memory wbnbToEthRoute = new route[](1);
-		wbnbToEthRoute[0] = route(wbnb, eth, false);
+		route[] memory wbnbToDolaRoute = new route[](1);
+		wbnbToDolaRoute[0] = route(wbnb, dola, false);
 
 		uint256 wbnbBalance = IERC20(wbnb).balanceOf(address(this));
 
@@ -299,7 +299,7 @@ contract Strategy is BaseStrategy {
 			IThenaRouter(router).swapExactTokensForTokens(
 				wbnbBalance,
 				1,
-				wbnbToEthRoute,
+				wbnbToDolaRoute,
 				address(this),
 				block.timestamp
 			);
@@ -308,35 +308,35 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Swaps half of the ETH for token0 and token1 and adds liquidity.
+	 *  Swaps half of the DOLA for token0 and token1 and adds liquidity.
 	 */
 	function _convertToLpToken() internal {
-		route[] memory ethToToken0Route = new route[](1);
-		ethToToken0Route[0] = route(eth, address(token0), true);
+		route[] memory dolaToToken0Route = new route[](1);
+		dolaToToken0Route[0] = route(dola, address(token0), true);
 
-		route[] memory ethToToken1Route = new route[](1);
-		ethToToken1Route[0] = route(eth, address(token1), true);
+		route[] memory dolaToToken1Route = new route[](1);
+		dolaToToken1Route[0] = route(dola, address(token1), true);
 
-		uint256 ethBalance = IERC20(eth).balanceOf(address(this));
+		uint256 dolaBalance = IERC20(dola).balanceOf(address(this));
 
-		if (ethBalance > 1e12) {
-			// If token0 or token1 is eth we skip the swap
-			if (address(token0) != eth) {
-				// 1/2 eth to token0
+		if (dolaBalance > 1e16) {
+			// If token0 or token1 is dola we skip the swap
+			if (address(token0) != dola) {
+				// 1/2 dola to token0
 				IThenaRouter(router).swapExactTokensForTokens(
-					ethBalance.div(2),
+					dolaBalance.div(2),
 					1,
-					ethToToken0Route,
+					dolaToToken0Route,
 					address(this),
 					block.timestamp
 				);
 			}
-			if (address(token1) != eth) {
-				// 1/2 eth to token1
+			if (address(token1) != dola) {
+				// 1/2 dola to token1
 				IThenaRouter(router).swapExactTokensForTokens(
-					ethBalance.div(2),
+					dolaBalance.div(2),
 					1,
-					ethToToken1Route,
+					dolaToToken1Route,
 					address(this),
 					block.timestamp
 				);
@@ -443,8 +443,8 @@ contract Strategy is BaseStrategy {
 		IERC20(wbnb).safeApprove(router, 0);
 		IERC20(wbnb).safeApprove(router, MAX);
 
-		IERC20(eth).safeApprove(router, 0);
-		IERC20(eth).safeApprove(router, MAX);
+		IERC20(dola).safeApprove(router, 0);
+		IERC20(dola).safeApprove(router, MAX);
 
 		IERC20(thenaReward).safeApprove(router, 0);
 		IERC20(thenaReward).safeApprove(router, MAX);
