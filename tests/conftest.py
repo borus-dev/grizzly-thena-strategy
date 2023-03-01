@@ -27,11 +27,17 @@ stratConfig = {
         "name":"StrategyThenaUSDT_FRAX",
         "masterChef":"0x4b1f8ac4c46348919b70bcab62443eeafb770aa4",
         "token_address": "0x8D65dBe7206A768C466073aF0AB6d76f9e14Fc6D",
-        "whale":"0x44e434b0eb83534b697f9c77ef11fb981b637def",
+        "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
+    }, # NOTE Works
+    "USDT_USDC": {
+        "name":"StrategyThenaUSDT_USDC",
+        "masterChef":"0x19beb32dc0fb085ef372e96e946be21ecee3fc51",
+        "token_address": "0x618f9Eb0E1a698409621f4F487B563529f003643",
+        "whale":"0x84912149f93d963ad5ddc3c2781b1950d160a4da",
     }, # NOTE Works
 }
 
-strat = stratConfig["MAI_FRAX"]
+strat = stratConfig["USDT_USDC"]
 print("strat", strat)
 
 
@@ -73,7 +79,7 @@ def user3(accounts):
 
 @pytest.fixture
 def userWithDAI(accounts):
-    yield accounts.at("0x59ABf3837Fa962d6853b4Cc0a19513AA031fd32b", force=True)
+    yield accounts.at("0xf89d7b9c864f589bbf53a82105107622b35eaa40", force=True)
 
 @pytest.fixture
 def userWithWeth(accounts):
@@ -96,7 +102,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 200 * 10 ** token.decimals()
+    amount = 20 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -105,7 +111,7 @@ def amount(accounts, token, user):
     
 @pytest.fixture
 def amount2(accounts, token, user2):
-    amount = 60 * 10 ** token.decimals()
+    amount = 6 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -114,7 +120,7 @@ def amount2(accounts, token, user2):
 
 @pytest.fixture
 def amount3(accounts, token, user3):
-    amount = 40 * 10 ** token.decimals()
+    amount = 3 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -168,7 +174,7 @@ def strategy(strategist, keeper, vault, Strategy, gov, masterChef, thenaLp):
     )    
     # strategy = deployStrategy(Strategy, strategist, gov ,vault)
     strategy.setKeeper(keeper)
-    strategy.setDust(1e15, 1e15, {"from" :gov})
+    strategy.setDust(1e5, 1e5, {"from" :gov})
     vault.addStrategy(strategy, 10_000, 0, 2 ** 256 - 1, 0, {"from": gov})
     # addHealthCheck(strategy, gov, gov)
     yield strategy

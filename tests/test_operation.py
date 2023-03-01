@@ -68,8 +68,8 @@ def test_operation_half_withdraw(
     # Deposit funds on the strategy and invest them
     chain.sleep(1)
     strategy.harvest({"from":gov})
-    stratInitalAssets = strategy.estimatedTotalAssets()
-    assert pytest.approx(stratInitalAssets, rel=RELATIVE_APPROX) == amount
+    stratInitialAssets = strategy.estimatedTotalAssets()
+    assert pytest.approx(stratInitialAssets, rel=RELATIVE_APPROX) == amount
 
     util.airdrop_rewards(strategy, thenaReward, thenaReward_whale)
 
@@ -79,10 +79,11 @@ def test_operation_half_withdraw(
 
     time= 86400 # 100 days of work = 1/3 years
     util.airdrop_rewards(strategy, thenaReward, thenaReward_whale)
+    chain.sleep(1)
     chain.mine(1)
     strategy.harvest({"from":gov})
 
-    assert strategy.estimatedTotalAssets() > stratInitalAssets
+    assert strategy.estimatedTotalAssets() > stratInitialAssets
 
 def test_claim_rewards(
     chain, token, vault,gov, strategy, user, amount, RELATIVE_APPROX, thenaReward, thenaReward_whale
@@ -95,8 +96,8 @@ def test_claim_rewards(
     # Deposit funds on the strategy and invest them
     chain.sleep(1)
     strategy.harvest({"from":gov})
-    stratInitalAssets = strategy.estimatedTotalAssets()
-    assert pytest.approx(stratInitalAssets, rel=RELATIVE_APPROX) == amount
+    stratInitialAssets = strategy.estimatedTotalAssets()
+    assert pytest.approx(stratInitialAssets, rel=RELATIVE_APPROX) == amount
     
     chain.sleep(86400 * 10)
     chain.mine(1)
