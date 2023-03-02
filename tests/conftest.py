@@ -17,6 +17,12 @@ stratConfig = {
         "token_address": "0xD523AC2609c3A56f945242CC239e9F47c018bf6b",
         "whale":"0xa1c461773fddfc9ce61db159b19c5927fc047d9c",
     }, # NOTE Works
+        "USDT_TAROT": {
+        "name":"StrategyThenaUSDT_TAROT",
+        "masterChef":"0xda6fc5422475c424928f3a21e9b8d9f80b1db190",
+        "token_address": "0x8efeeAE90E67051c4F9130DD4f27d5D443E58A8b",
+        "whale":"0xa1c461773fddfc9ce61db159b19c5927fc047d9c",
+    }, # NOTE No whale available
 }
 
 strat = stratConfig["USDT_FITFI"]
