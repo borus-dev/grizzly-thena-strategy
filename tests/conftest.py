@@ -11,15 +11,15 @@ sys.path.append( strategyDeploy_dir )
 from deployStrategy import addHealthCheck, deploy
 
 stratConfig = {
-    "ETH_frxETH": {
-        "name":"StrategyThenaETH_frxETH",
-        "masterChef":"0x33a357fad7dd41692f2403b919225f0624ea50ff",
-        "token_address": "0x8A420aACA0c92e3f97CDcFdd852e01Ac5b609452",
-        "whale":"0xa0b5fba97d47af642c06655a3ace103b1bc3bf7e",
+    "USDT_FITFI": {
+        "name":"StrategyThenaUSDT_FITFI",
+        "masterChef":"0xcd62ef8b3324d8506e8592234ca7e41b95d2394f",
+        "token_address": "0xD523AC2609c3A56f945242CC239e9F47c018bf6b",
+        "whale":"0xa1c461773fddfc9ce61db159b19c5927fc047d9c",
     }, # NOTE Works
 }
 
-strat = stratConfig["ETH_frxETH"]
+strat = stratConfig["USDT_FITFI"]
 print("strat", strat)
 
 
@@ -84,7 +84,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 0.007 * 10 ** token.decimals()
+    amount = 0.002 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -93,7 +93,7 @@ def amount(accounts, token, user):
     
 @pytest.fixture
 def amount2(accounts, token, user2):
-    amount = 0.002 * 10 ** token.decimals()
+    amount = 0.0003 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -102,7 +102,7 @@ def amount2(accounts, token, user2):
 
 @pytest.fixture
 def amount3(accounts, token, user3):
-    amount = 0.001 * 10 ** token.decimals()
+    amount = 0.0001 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)

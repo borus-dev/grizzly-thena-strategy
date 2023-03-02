@@ -31,7 +31,7 @@ contract Strategy is BaseStrategy {
 	address internal constant wbnb = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // WBNB
 	address public constant thenaReward = address(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11); // THENA
 	address internal constant busd = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56); // BUSD
-	address internal constant eth = address(0x2170Ed0880ac9A755fd29B2688956BD959F933F8); // ETH
+	address internal constant usdt = address(0x55d398326f99059fF775485246999027B3197955); // USDT
 
 	address public constant router = address(0x20a304a7d126758dfe6B243D0fc515F83bCA8431); // Thena Router
 	ILpDepositor public masterChef; // {masterChef} - Depositor contract for Thena
@@ -147,11 +147,11 @@ contract Strategy is BaseStrategy {
 		_claimRewards();
 		// Send some THENA to voter
 		_sendToVoter();
-		// Swap THENA for wBNB
+		// Swap THENA for BUSD
 		_sellRewards();
-		// Swap wBNB to intermediate
+		// Swap BUSD to intermediate
 		_convertToIntermediate();
-		// Swap wBNB for token0 & token1 and build the LP
+		// Swap USDT for token0 & token1 and build the LP
 		_convertToLpToken();
 
 		uint256 assets = estimatedTotalAssets();
@@ -256,20 +256,20 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Swaps THENA for wBNB.
+	 *  Swaps THENA for BUSD.
 	 */
 	function _sellRewards() internal {
-		route[] memory thenaToWbnbRoute = new route[](1);
-		thenaToWbnbRoute[0] = route(thenaReward, wbnb, false);
+		route[] memory thenaToBusdRoute = new route[](1);
+		thenaToBusdRoute[0] = route(thenaReward, busd, false);
 
 		uint256 thenaRewards = balanceOfReward();
 
 		if (thenaRewards > rewardDust) {
-			// THENA to wBNB
+			// THENA to BUSD
 			IThenaRouter(router).swapExactTokensForTokens(
 				thenaRewards,
 				1,
-				thenaToWbnbRoute,
+				thenaToBusdRoute,
 				address(this),
 				block.timestamp
 			);
@@ -287,19 +287,19 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Swaps half of the wBNB for ETH.
+	 *  Swaps half of the BUSD for USDT.
 	 */
 	function _convertToIntermediate() internal {
-		route[] memory wbnbToEthRoute = new route[](1);
-		wbnbToEthRoute[0] = route(wbnb, eth, false);
+		route[] memory busdToUsdtRoute = new route[](1);
+		busdToUsdtRoute[0] = route(busd, usdt, true);
 
-		uint256 wbnbBalance = IERC20(wbnb).balanceOf(address(this));
+		uint256 busdBalance = IERC20(busd).balanceOf(address(this));
 
-		if (wbnbBalance > 1e12) {
+		if (busdBalance > 1e16) {
 			IThenaRouter(router).swapExactTokensForTokens(
-				wbnbBalance,
+				busdBalance,
 				1,
-				wbnbToEthRoute,
+				busdToUsdtRoute,
 				address(this),
 				block.timestamp
 			);
@@ -308,35 +308,35 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Swaps half of the ETH for token0 and token1 and adds liquidity.
+	 *  Swaps half of the USDT for token0 and token1 and adds liquidity.
 	 */
 	function _convertToLpToken() internal {
-		route[] memory ethToToken0Route = new route[](1);
-		ethToToken0Route[0] = route(eth, address(token0), true);
+		route[] memory usdtToToken0Route = new route[](1);
+		usdtToToken0Route[0] = route(usdt, address(token0), false);
 
-		route[] memory ethToToken1Route = new route[](1);
-		ethToToken1Route[0] = route(eth, address(token1), true);
+		route[] memory usdtToToken1Route = new route[](1);
+		usdtToToken1Route[0] = route(usdt, address(token1), false);
 
-		uint256 ethBalance = IERC20(eth).balanceOf(address(this));
+		uint256 usdtBalance = IERC20(usdt).balanceOf(address(this));
 
-		if (ethBalance > 1e12) {
-			// If token0 or token1 is eth we skip the swap
-			if (address(token0) != eth) {
-				// 1/2 eth to token0
+		if (usdtBalance > 1e16) {
+			// If token0 or token1 is usdt we skip the swap
+			if (address(token0) != usdt) {
+				// 1/2 usdt to token0
 				IThenaRouter(router).swapExactTokensForTokens(
-					ethBalance.div(2),
+					usdtBalance.div(2),
 					1,
-					ethToToken0Route,
+					usdtToToken0Route,
 					address(this),
 					block.timestamp
 				);
 			}
-			if (address(token1) != eth) {
-				// 1/2 eth to token1
+			if (address(token1) != usdt) {
+				// 1/2 usdt to token1
 				IThenaRouter(router).swapExactTokensForTokens(
-					ethBalance.div(2),
+					usdtBalance.div(2),
 					1,
-					ethToToken1Route,
+					usdtToToken1Route,
 					address(this),
 					block.timestamp
 				);
@@ -440,11 +440,11 @@ contract Strategy is BaseStrategy {
 		IERC20(address(thenaLp)).safeApprove(router, 0);
 		IERC20(address(thenaLp)).safeApprove(router, MAX);
 
-		IERC20(wbnb).safeApprove(router, 0);
-		IERC20(wbnb).safeApprove(router, MAX);
+		IERC20(busd).safeApprove(router, 0);
+		IERC20(busd).safeApprove(router, MAX);
 
-		IERC20(eth).safeApprove(router, 0);
-		IERC20(eth).safeApprove(router, MAX);
+		IERC20(usdt).safeApprove(router, 0);
+		IERC20(usdt).safeApprove(router, MAX);
 
 		IERC20(thenaReward).safeApprove(router, 0);
 		IERC20(thenaReward).safeApprove(router, MAX);
