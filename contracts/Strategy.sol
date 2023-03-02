@@ -319,7 +319,7 @@ contract Strategy is BaseStrategy {
 
 		uint256 ankrBalance = IERC20(ankr).balanceOf(address(this));
 
-		if (ankrBalance > 1e12) {
+		if (ankrBalance > 1e16) {
 			// If token0 or token1 is ankr we skip the swap
 			if (address(token0) != ankr) {
 				// 1/2 ankr to token0
