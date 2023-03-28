@@ -76,10 +76,10 @@ contract Strategy is BaseStrategy {
 		maxReportDelay = 30 days;
 		minProfit = 1e21;
 
-		keepTHE = 2000;
+		keepTHE = 0;
 
-		dust = 10**uint256((ERC20(address(want)).decimals()));
-		rewardDust = 10**uint256((ERC20(address(thenaReward)).decimals()));
+		dust = 10 ** uint256((ERC20(address(want)).decimals()));
+		rewardDust = 10 ** uint256((ERC20(address(thenaReward)).decimals()));
 
 		masterChef = ILpDepositor(_masterChef);
 		require(masterChef.TOKEN() == address(want), "Wrong masterChef");
@@ -133,15 +133,9 @@ contract Strategy is BaseStrategy {
 	//      Internal Core func       //
 	//-------------------------------//
 
-	function prepareReturn(uint256 _debtOutstanding)
-		internal
-		override
-		returns (
-			uint256 _profit,
-			uint256 _loss,
-			uint256 _debtPayment
-		)
-	{
+	function prepareReturn(
+		uint256 _debtOutstanding
+	) internal override returns (uint256 _profit, uint256 _loss, uint256 _debtPayment) {
 		// Claim THENA rewards
 		_claimRewards();
 		// Send some THENA to voter
@@ -204,11 +198,9 @@ contract Strategy is BaseStrategy {
 		}
 	}
 
-	function liquidatePosition(uint256 _amountNeeded)
-		internal
-		override
-		returns (uint256 _liquidatedAmount, uint256 _loss)
-	{
+	function liquidatePosition(
+		uint256 _amountNeeded
+	) internal override returns (uint256 _liquidatedAmount, uint256 _loss) {
 		if (estimatedTotalAssets() <= _amountNeeded) {
 			_liquidatedAmount = liquidateAllPositions();
 			return (_liquidatedAmount, _amountNeeded.sub(_liquidatedAmount));
@@ -507,10 +499,10 @@ contract Strategy is BaseStrategy {
 		forceHarvestTriggerOnce = _forceHarvestTriggerOnce;
 	}
 
-	function setParams(uint256 _maxSlippageIn, uint256 _maxSlippageOut)
-		external
-		onlyVaultManagers
-	{
+	function setParams(
+		uint256 _maxSlippageIn,
+		uint256 _maxSlippageOut
+	) external onlyVaultManagers {
 		require(_maxSlippageIn <= basisOne);
 		maxSlippageIn = _maxSlippageIn;
 
