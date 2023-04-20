@@ -120,11 +120,8 @@ contract Strategy is BaseStrategy {
 	function estimatedHarvest() public view returns (uint256 profitInBusd) {
 		uint256 thenaBalance = pendingRewards().add(balanceOfReward());
 
-		(uint256 profitInWbnb, ) = IThenaRouter(router).getAmountOut(
-			thenaBalance,
-			thenaReward,
-			wbnb
-		);
+		(uint256 profitInWbnb, ) =
+			IThenaRouter(router).getAmountOut(thenaBalance, thenaReward, wbnb);
 
 		(profitInBusd, ) = IThenaRouter(router).getAmountOut(profitInWbnb, wbnb, busd);
 	}
@@ -388,7 +385,7 @@ contract Strategy is BaseStrategy {
 	 * @notice
 	 *  AbandonRewards withdraws lp without rewards.
 	 * @dev
-	 *  Specify where to withdraw to.
+	 *  Specify where to withdraw to. Migrate function already has safeTransfer of want.
 	 */
 	function _withdrawFromMasterChefAndTransfer(address _to) internal {
 		if (abandonRewards) {
@@ -396,12 +393,7 @@ contract Strategy is BaseStrategy {
 		} else {
 			_claimRewards();
 			_withdrawLpFromMasterChef(balanceOfLPInMasterChef());
-			uint256 _thenaRewards = balanceOfReward();
-			IERC20(thenaReward).safeTransfer(_to, _thenaRewards);
-		}
-		uint256 lpTokensBalance = balanceOfWant();
-		if (lpTokensBalance > 0) {
-			IERC20(address(thenaLp)).safeTransfer(_to, lpTokensBalance);
+			IERC20(thenaReward).safeTransfer(_to, balanceOfReward());
 		}
 	}
 
@@ -538,6 +530,14 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
+	 *  Manually returns lps in masterChef to the strategy when Thena masterchef is in emergency mode.
+	 */
+	function emergencyWithdrawFromMasterChefInEmergencyMode() external onlyVaultManagers {
+		masterChef.emergencyWithdraw();
+	}
+
+	/**
+	 * @notice
 	 *  Toggle for whether to abandon rewards or not on emergency withdraws from masterChef.
 	 */
 	function setAbandonRewards(bool abandon) external onlyVaultManagers {
@@ -546,3 +546,4 @@ contract Strategy is BaseStrategy {
 
 	receive() external payable {}
 }
+
