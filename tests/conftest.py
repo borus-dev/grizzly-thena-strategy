@@ -25,7 +25,7 @@ stratConfig = {
     }, # NOTE Works
     "USDT_FRAX": {
         "name":"StrategyThenaUSDT_FRAX",
-        "masterChef":"0x4b1f8ac4c46348919b70bcab62443eeafb770aa4",
+        "masterChef":"0xb34dff23ab5b612eb21ffd8a151eff452899f0f1",
         "token_address": "0x8D65dBe7206A768C466073aF0AB6d76f9e14Fc6D",
         "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
     }, # NOTE Works
@@ -37,9 +37,9 @@ stratConfig = {
     }, # NOTE Works
     "USDT_BUSD": {
         "name":"StrategyThenaUSDT_BUSD",
-        "masterChef":"0x41ada56dd5702906549a71666541a39b0dbceb12",
+        "masterChef":"0xe998120c06f1c1db80122399aed2fc5e49bcb51f",
         "token_address": "0x6321B57b6fdc14924be480c54e93294617E672aB",
-        "whale":"0x82fa32993fff3bc87777136d28935b9e89a6195d",
+        "whale":"0x0ebc5ef5d9bf7b0e74c17a80d6813491ebe5bb40",
     }, # NOTE Works
     "HAY_BUSD": {
         "name":"StrategyThenaHAY_BUSD",
@@ -47,7 +47,7 @@ stratConfig = {
         "token_address": "0x93B32a8dfE10e9196403dd111974E325219aec24",
         "whale":"0x617e6e52927580b65fa6a9c366a3a76ff439f393",
     }, # NOTE Works
-        "USDC_BUSD": {
+    "USDC_BUSD": {
         "name":"StrategyThenaUSDC_BUSD",
         "masterChef":"0x11e79bc17cb1ff3d4f6a025412ac84960b20ba81",
         "token_address": "0x7e61c053527A7Af0c700aD9D2C8207E386273222",
@@ -55,7 +55,7 @@ stratConfig = {
     }, # NOTE Works
 }
 
-strat = stratConfig["USDC_BUSD"]
+strat = stratConfig["USDT_BUSD"]
 print("strat", strat)
 
 
@@ -120,7 +120,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 3 * 10 ** token.decimals()
+    amount = 15 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
