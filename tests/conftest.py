@@ -22,7 +22,7 @@ stratConfig = {
         "masterChef":"0x556b0b722cc72369cea0ea9c4726a71fb2d1772d",
         "token_address": "0x49ad051F4263517BD7204f75123b7C11aF9Fd31C",
         "whale":"0xb4ce0c954bb129d8039230f701bb6503dca1ee8c",
-    }, # NOTE Works
+    }, # NOTE V2
     "USDT_FRAX": {
         "name":"StrategyThenaUSDT_FRAX",
         "masterChef":"0xb34dff23ab5b612eb21ffd8a151eff452899f0f1",
@@ -52,7 +52,7 @@ stratConfig = {
         "masterChef":"0x11e79bc17cb1ff3d4f6a025412ac84960b20ba81",
         "token_address": "0x7e61c053527A7Af0c700aD9D2C8207E386273222",
         "whale":"0xbdf2a6cbdcb4c7538b04edb82c4ba871f5382118",
-    }, # NOTE Works
+    }, # NOTE V2
 }
 
 strat = stratConfig["USDT_USDC"]
