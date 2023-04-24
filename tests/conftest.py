@@ -28,25 +28,25 @@ stratConfig = {
         "masterChef":"0xb34dff23ab5b612eb21ffd8a151eff452899f0f1",
         "token_address": "0x8D65dBe7206A768C466073aF0AB6d76f9e14Fc6D",
         "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
-    }, # NOTE Works
+    }, # NOTE V2
     "USDT_USDC": {
         "name":"StrategyThenaUSDT_USDC",
         "masterChef":"0x19beb32dc0fb085ef372e96e946be21ecee3fc51",
         "token_address": "0x618f9Eb0E1a698409621f4F487B563529f003643",
-        "whale":"0x84912149f93d963ad5ddc3c2781b1950d160a4da",
-    }, # NOTE Works
+        "whale":"0x2957d557ce764da70da2f65d376ef252fcd4eef6",
+    }, # NOTE V2
     "USDT_BUSD": {
         "name":"StrategyThenaUSDT_BUSD",
         "masterChef":"0xe998120c06f1c1db80122399aed2fc5e49bcb51f",
         "token_address": "0x6321B57b6fdc14924be480c54e93294617E672aB",
         "whale":"0x0ebc5ef5d9bf7b0e74c17a80d6813491ebe5bb40",
-    }, # NOTE Works
+    }, # NOTE V2
     "HAY_BUSD": {
         "name":"StrategyThenaHAY_BUSD",
-        "masterChef":"0xe43317c1f037cbbaf33f33c386f2caf2b6b25c9c",
+        "masterChef":"0x5f8a3d4ad41352A8145DDe8dC0aA3159C7B7649D",
         "token_address": "0x93B32a8dfE10e9196403dd111974E325219aec24",
-        "whale":"0x617e6e52927580b65fa6a9c366a3a76ff439f393",
-    }, # NOTE Works
+        "whale":"0x5f0d1ede539dba3ad18e12b0f0200cf852a4cd7d",
+    }, # NOTE V2
     "USDC_BUSD": {
         "name":"StrategyThenaUSDC_BUSD",
         "masterChef":"0x11e79bc17cb1ff3d4f6a025412ac84960b20ba81",
@@ -55,7 +55,7 @@ stratConfig = {
     }, # NOTE Works
 }
 
-strat = stratConfig["USDT_BUSD"]
+strat = stratConfig["USDT_USDC"]
 print("strat", strat)
 
 
