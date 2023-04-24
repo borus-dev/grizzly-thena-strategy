@@ -13,9 +13,12 @@ interface ILpDepositor {
 
 	function withdraw(uint256 amount) external;
 
+	function emergencyWithdraw() external;
+
 	function getReward() external;
 
 	function TOKEN() external view returns (address);
 
 	function rewardToken() external view returns (address);
 }
+

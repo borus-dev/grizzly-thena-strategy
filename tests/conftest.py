@@ -13,7 +13,7 @@ from deployStrategy import addHealthCheck, deploy
 stratConfig = {
     "DOLA_CUSD": {
         "name":"StrategyThenaDOLA_CUSD",
-        "masterChef":"0xc2b56de677e6d35327e1cf3daf2357f20a4c8692",
+        "masterChef":"0xacf4bd5D90215C6cA9d5B1d884E75fc5574F7572",
         "token_address": "0x7061F52ed4942021924745D454d722E52e057e03",
         "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
     },  # NOTE Works
