@@ -65,14 +65,14 @@ def main():
         *deployArgs, {"from": dev}, publish_source=publish_source
     )
 
-    addHealthCheck(strategy, dev)
+#     addHealthCheck(strategy, dev)
     
-    addStrategy(strategy, vault, dev)
+#     addStrategy(strategy, vault, dev)
 
-def addHealthCheck(strategy, deployer):
-    healthCheck = "0x7578cc483c4a7b0765e1ab72933877c80f7a1649"
-    strategy.setHealthCheck(healthCheck,{"from": deployer})
-    return healthCheck
+# def addHealthCheck(strategy, deployer):
+#     healthCheck = "0x7578cc483c4a7b0765e1ab72933877c80f7a1649"
+#     strategy.setHealthCheck(healthCheck,{"from": deployer})
+#     return healthCheck
 
 # def addStrategy(strategy, vault, deployer):
 #     vault.addStrategy(strategy, 10_000, 0, 2 ** 256 - 1, 0, {"from": deployer})
