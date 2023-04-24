@@ -78,7 +78,7 @@ contract Strategy is BaseStrategy {
 
 		keepTHE = 2000;
 
-		dust = 10**uint256((ERC20(address(want)).decimals()));
+		dust = 1e15;
 		rewardDust = 10**uint256((ERC20(address(thenaReward)).decimals()));
 
 		masterChef = ILpDepositor(_masterChef);
