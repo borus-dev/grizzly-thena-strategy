@@ -19,9 +19,9 @@ stratConfig = {
     }, # NOTE Works
     "MAI_FRAX": {
         "name":"StrategyThenaMAI_FRAX",
-        "masterChef":"0x556b0b722cc72369cea0ea9c4726a71fb2d1772d",
+        "masterChef":"0x2ee5d2baa34e86f4af9d727df1ff6ced2ddbdc40",
         "token_address": "0x49ad051F4263517BD7204f75123b7C11aF9Fd31C",
-        "whale":"0xb4ce0c954bb129d8039230f701bb6503dca1ee8c",
+        "whale":"0xe85fc09d80e47c9dddd85147546361a6990fbabf",
     }, # NOTE V2
     "USDT_FRAX": {
         "name":"StrategyThenaUSDT_FRAX",
@@ -55,7 +55,7 @@ stratConfig = {
     }, # NOTE V2
 }
 
-strat = stratConfig["USDT_USDC"]
+strat = stratConfig["MAI_FRAX"]
 print("strat", strat)
 
 
@@ -120,7 +120,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 15 * 10 ** token.decimals()
+    amount = 150 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
