@@ -49,9 +49,9 @@ stratConfig = {
     }, # NOTE Works
     "MULTI_BNB": {
         "name":"StrategyThenaMULTI_BNB",
-        "masterChef":"0x8e89554687Aa59763362a32Da0117D70a72f568B",
+        "masterChef":"0x7Ab3e3cF64657FD89fcb399796f0888206766601",
         "token_address": "0x075E794F631eE81df1aadB510aC6Ec8803B0FA35",
-        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
+        "whale":"0x55a532ad615976f4e09c07970e56a31f7aa4da66",
     }, # NOTE Works
     "THENA_BNB": {
         "name":"StrategyThenaTHENA_BNB",
@@ -73,7 +73,7 @@ stratConfig = {
     }, # NOTE Works
 }
 
-strat = stratConfig["THENA_BNB"]
+strat = stratConfig["MULTI_BNB"]
 print("strat", strat)
 
 
@@ -138,7 +138,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 10 * 10 ** token.decimals()
+    amount = 0.000003 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -147,7 +147,7 @@ def amount(accounts, token, user):
     
 @pytest.fixture
 def amount2(accounts, token, user2):
-    amount = 3 * 10 ** token.decimals()
+    amount = 0.000002 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -156,7 +156,7 @@ def amount2(accounts, token, user2):
 
 @pytest.fixture
 def amount3(accounts, token, user3):
-    amount = 8 * 10 ** token.decimals()
+    amount = 0.000001 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
