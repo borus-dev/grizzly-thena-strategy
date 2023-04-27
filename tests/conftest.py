@@ -25,7 +25,7 @@ stratConfig = {
     }, # NOTE Works
     "XCAD_BNB": {
         "name":"StrategyThenaXCAD_BNB",
-        "masterChef":"0xA6fccd530AE7C4de8bCA9fF28403ea49637780Bf",
+        "masterChef":"0x40ab8d70895786980C7e3A77b5Cc26A39813aDb2",
         "token_address": "0x3Ec80A1f547ee6FD5D7FC0DC0C1525Ff343D087C",
         "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
     }, # NOTE Works
@@ -35,7 +35,7 @@ stratConfig = {
         "token_address": "0x7061F52ed4942021924745D454d722E52e057e03",
         "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
     },  # NOTE CUSD does not have pools to switch for BNB only BUSD
-        "DOLA_BNB": {
+    "DOLA_BNB": {
         "name":"StrategyThenaDOLA_CUSD",
         "masterChef":"0xA71bF9252106aB196F0494F5eCe149e71807c1eC",
         "token_address": "0xc5856601712E8a74d57cdc7a47fB1B41C1a6Fae2",
@@ -43,28 +43,28 @@ stratConfig = {
     },  # NOTE No whale available
     "DEUS_BNB": {
         "name":"StrategyThenaDEUS_BNB",
-        "masterChef":"0x04034f879a737233bf0ef278b50fd06cc70c87e4",
+        "masterChef":"0x586cF0Ce829e39c3B37944E183D2DFB280191b50",
         "token_address": "0xC8Da40f8A354530F04CE2dDe98Ebc2960a9eA449",
         "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
     }, # NOTE Works
     "MULTI_BNB": {
         "name":"StrategyThenaMULTI_BNB",
-        "masterChef":"0x8e89554687Aa59763362a32Da0117D70a72f568B",
+        "masterChef":"0x7Ab3e3cF64657FD89fcb399796f0888206766601",
         "token_address": "0x075E794F631eE81df1aadB510aC6Ec8803B0FA35",
-        "whale":"0xde64f98baece7282973ce8d67cd73455d4748673",
+        "whale":"0x55a532ad615976f4e09c07970e56a31f7aa4da66",
     }, # NOTE Works
     "THENA_BNB": {
         "name":"StrategyThenaTHENA_BNB",
-        "masterChef":"0x638b0cc37ffe5a040079F75Ae6C50C9A386dDCaF",
+        "masterChef":"0x9206fF0db7a937976f08527bb8110a249fE80a2E",
         "token_address": "0x63Db6ba9E512186C2FAaDaCEF342FB4A40dc577c",
         "whale":"0x1c6c2498854662fdeadbc4f14ea2f30ca305104b",
     }, # NOTE Works
     "THENA_BUSD": {
         "name":"StrategyThenaTHENA_BUSD",
-        "masterChef":"0x8a8Ec422Fc51B2A88dD5BE489C40aAF1E1fa73d0",
+        "masterChef":"0xc04CA17B1c96C73E32DCb7cD0A1BA69cbed5bC67",
         "token_address": "0x34B897289fcCb43c048b2Cea6405e840a129E021",
-        "whale":"0x87f1f1f22f02c46ea3649a326cafba2c7a1df6b1",
-    }, # NOTE Works
+        "whale":"0x9c3de74fa4537d7641218f70c23c28e76ed1d8fb",
+    }, # NOTE v2
     "TAROT_BNB": {
         "name":"StrategyThenaTAROT_BNB",
         "masterChef":"0xf49bff8fb6a0ad43475d28be955e62c10c50a998",
@@ -73,7 +73,7 @@ stratConfig = {
     }, # NOTE Works
 }
 
-strat = stratConfig["GHNY_BNB"]
+strat = stratConfig["THENA_BUSD"]
 print("strat", strat)
 
 
@@ -138,7 +138,7 @@ def thenaReward_whale(accounts):
 
 @pytest.fixture
 def amount(accounts, token, user):
-    amount = 8 * 10 ** token.decimals()
+    amount = 30 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -147,7 +147,7 @@ def amount(accounts, token, user):
     
 @pytest.fixture
 def amount2(accounts, token, user2):
-    amount = 3 * 10 ** token.decimals()
+    amount = 30 * 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
@@ -156,7 +156,7 @@ def amount2(accounts, token, user2):
 
 @pytest.fixture
 def amount3(accounts, token, user3):
-    amount = 1 * 10 ** token.decimals()
+    amount = 10 ** token.decimals()
     # In order to get some funds for the token you are about to use,
     # it impersonate an exchange address to use it's funds.
     reserve = accounts.at(strat["whale"], force=True)
