@@ -11,15 +11,20 @@ import { Address } from "./library/Address.sol";
 import { ERC20 } from "./library/ERC20.sol";
 import { Math } from "./library/Math.sol";
 
+import { FullMath } from "../algebra/periphery/contracts/libraries/LiquidityAmounts.sol";
+import { IAlgebraPool } from "../algebra/core/contracts/interfaces/IAlgebraPool.sol";
+import { IAlgebraFactory } from "../algebra/core/contracts/interfaces/IAlgebraFactory.sol";
+import { TickMath } from "../algebra/core/contracts/libraries/TickMath.sol";
 import { ILpDepositor } from "../interfaces/ILpDepositor.sol";
-import { IThenaRouter, route } from "../interfaces/IThenaRouter.sol";
-import { IUniRouter } from "../interfaces/IUniswapV2Router02.sol";
+import { IThenaRouter } from "../interfaces/IThenaRouter.sol";
+import { IUniV3Router } from "../interfaces/IUniV3Router.sol";
 import { IV1Pair } from "../interfaces/IThenaV1Pair.sol";
 
 contract Strategy is BaseStrategy {
 	using SafeERC20 for IERC20;
 	using Address for address;
 	using SafeMath for uint256;
+	using TickMath for int24;
 
 	/**
 	 * @dev Tokens Used:
@@ -30,10 +35,17 @@ contract Strategy is BaseStrategy {
 	 */
 	address internal constant wbnb = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // WBNB
 	address public constant thenaReward = address(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11); // THENA
-	address internal constant busd = address(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56); // BUSD
+	address internal usdt = address(0x55d398326f99059fF775485246999027B3197955); // USDT
 
+	address internal v3Router = address(0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0); // AlgebraFinance Router
 	address public constant router = address(0x20a304a7d126758dfe6B243D0fc515F83bCA8431); // Thena Router
 	ILpDepositor public masterChef; // {masterChef} - Depositor contract for Thena
+
+	IAlgebraPool internal wbnbThePool = IAlgebraPool(0x51Bd5e6d3da9064D59BcaA5A76776560aB42cEb8);
+	IAlgebraPool internal usdtWbnbPool =
+		IAlgebraPool(0xD405b976Ac01023c9064024880999fC450A8668b);
+	IAlgebraPool internal wbnbToken0Pool;
+	IAlgebraPool internal wbnbToken1Pool;
 
 	IV1Pair public thenaLp;
 	IERC20 public token0;
@@ -45,11 +57,15 @@ contract Strategy is BaseStrategy {
 	uint256 public maxSlippageIn; // bps
 	uint256 public maxSlippageOut; // bps
 
+	uint24 public maxSwapSlippage;
+
 	bool internal abandonRewards;
 
 	bool internal immutable isStable;
 	uint256 internal constant basisOne = 10000;
+	uint256 internal constant basisOnePool = 1000000;
 	uint256 internal constant MAX = type(uint256).max;
+	uint256 internal constant Q96 = 0x1000000000000000000000000;
 
 	uint256 public minProfit;
 	bool internal forceHarvestTriggerOnce;
@@ -70,8 +86,14 @@ contract Strategy is BaseStrategy {
 		token0 = IERC20(thenaLp.token0());
 		token1 = IERC20(thenaLp.token1());
 
+		IAlgebraFactory factory = IAlgebraFactory(0x306F06C147f064A010530292A1EB6737c3e378e4);
+		wbnbToken0Pool = IAlgebraPool(factory.poolByPair(wbnb, address(token0)));
+		wbnbToken1Pool = IAlgebraPool(factory.poolByPair(wbnb, address(token1)));
+
 		maxSlippageIn = 1;
 		maxSlippageOut = 1;
+
+		maxSwapSlippage = 50000; // 5%
 
 		maxReportDelay = 30 days;
 		minProfit = 1e21;
@@ -117,13 +139,12 @@ contract Strategy is BaseStrategy {
 		_thenaBalance = masterChef.earned(address(this));
 	}
 
-	function estimatedHarvest() public view returns (uint256 profitInBusd) {
+	function estimatedHarvest() public view returns (uint256 profitInUsdt) {
 		uint256 thenaBalance = pendingRewards().add(balanceOfReward());
 
-		(uint256 profitInWbnb, ) =
-			IThenaRouter(router).getAmountOut(thenaBalance, thenaReward, wbnb);
+		uint256 profitInWbnb = _getAmountOut(wbnbThePool, false, thenaBalance);
 
-		(profitInBusd, ) = IThenaRouter(router).getAmountOut(profitInWbnb, wbnb, busd);
+		profitInUsdt = _getAmountOut(usdtWbnbPool, false, profitInWbnb);
 	}
 
 	//-------------------------------//
@@ -253,19 +274,23 @@ contract Strategy is BaseStrategy {
 	 *  Swaps THENA for WBNB.
 	 */
 	function _sellRewards() internal {
-		route[] memory thenaToWbnbRoute = new route[](1);
-		thenaToWbnbRoute[0] = route(thenaReward, wbnb, false);
-
 		uint256 thenaRewards = balanceOfReward();
 
 		if (thenaRewards > rewardDust) {
+			uint256 amountOut = _getAmountOut(wbnbThePool, false, thenaRewards);
 			// THENA to WBNB
-			IThenaRouter(router).swapExactTokensForTokens(
-				thenaRewards,
-				1,
-				thenaToWbnbRoute,
-				address(this),
-				block.timestamp
+			IUniV3Router(v3Router).exactInput(
+				IUniV3Router.ExactInputParams({
+					path: abi.encodePacked(thenaReward, wbnb),
+					recipient: address(this),
+					deadline: block.timestamp,
+					amountIn: thenaRewards,
+					amountOutMinimum: FullMath.mulDiv(
+						amountOut,
+						basisOnePool.sub(maxSwapSlippage),
+						basisOnePool
+					)
+				})
 			);
 		}
 	}
@@ -284,34 +309,47 @@ contract Strategy is BaseStrategy {
 	 *  Swaps half of the wbnb for token0 and token1 and adds liquidity.
 	 */
 	function _convertToLpToken() internal {
-		route[] memory wbnbToToken0Route = new route[](1);
-		wbnbToToken0Route[0] = route(wbnb, address(token0), false);
-
-		route[] memory wbnbToToken1Route = new route[](1);
-		wbnbToToken1Route[0] = route(wbnb, address(token1), false);
-
 		uint256 wbnbBalance = IERC20(wbnb).balanceOf(address(this));
+		uint256 amountIn = wbnbBalance.div(2);
+		uint256 amountOut;
+		bool zeroForOne;
 
 		if (wbnbBalance > 1e15) {
 			// If token0 or token1 is wbnb we skip the swap
 			if (address(token0) != wbnb) {
+				zeroForOne = address(wbnbToken0Pool.token0()) == wbnb;
+				amountOut = _getAmountOut(wbnbToken0Pool, zeroForOne, amountIn);
 				// 1/2 wbnb to token0
-				IThenaRouter(router).swapExactTokensForTokens(
-					wbnbBalance.div(2),
-					1,
-					wbnbToToken0Route,
-					address(this),
-					block.timestamp
+				IUniV3Router(v3Router).exactInput(
+					IUniV3Router.ExactInputParams({
+						path: abi.encodePacked(wbnb, address(token0)),
+						recipient: address(this),
+						deadline: block.timestamp,
+						amountIn: amountIn,
+						amountOutMinimum: FullMath.mulDiv(
+							amountOut,
+							basisOnePool.sub(maxSwapSlippage),
+							basisOnePool
+						)
+					})
 				);
 			}
 			if (address(token1) != wbnb) {
+				zeroForOne = address(wbnbToken1Pool.token0()) == wbnb;
+				amountOut = _getAmountOut(wbnbToken1Pool, zeroForOne, amountIn);
 				// 1/2 wbnb to token1
-				IThenaRouter(router).swapExactTokensForTokens(
-					wbnbBalance.div(2),
-					1,
-					wbnbToToken1Route,
-					address(this),
-					block.timestamp
+				IUniV3Router(v3Router).exactInput(
+					IUniV3Router.ExactInputParams({
+						path: abi.encodePacked(wbnb, address(token1)),
+						recipient: address(this),
+						deadline: block.timestamp,
+						amountIn: wbnbBalance.div(2),
+						amountOutMinimum: FullMath.mulDiv(
+							amountOut,
+							basisOnePool.sub(maxSwapSlippage),
+							basisOnePool
+						)
+					})
 				);
 			}
 		}
@@ -421,6 +459,33 @@ contract Strategy is BaseStrategy {
 		IERC20(token1).safeApprove(router, MAX);
 	}
 
+		/**
+	 * @notice Gets an out amount for a swap, based on the pool TWAP
+	 * @param pool The pool to use as a TWAP reference
+	 * @param zeroForOne Direction of the swap according to pool token order
+	 * @param amountIn Amount to swap
+	 */
+	function _getAmountOut(
+		IAlgebraPool pool,
+		bool zeroForOne,
+		uint256 amountIn
+	) internal view returns (uint256 amountOut) {
+		uint32[] memory secondsAgo = new uint32[](2);
+		secondsAgo[0] = 20;
+		secondsAgo[1] = 0;
+
+		(int56[] memory tickCumulatives, , , ) = pool.getTimepoints(secondsAgo);
+
+		int24 avgTick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(20));
+		uint160 avgSqrtRatioX96 = avgTick.getSqrtRatioAtTick();
+
+		uint256 priceX96 = FullMath.mulDiv(avgSqrtRatioX96, avgSqrtRatioX96, Q96);
+
+		amountOut = zeroForOne
+			? FullMath.mulDiv(amountIn, priceX96, Q96)
+			: FullMath.mulDiv(amountIn, Q96, priceX96);
+	}
+
 	/**
 	 * @notice
 	 *  Revert if slippage out exceeds our requirement.
@@ -508,6 +573,12 @@ contract Strategy is BaseStrategy {
 
 		require(_maxSlippageOut <= basisOne);
 		maxSlippageOut = _maxSlippageOut;
+	}
+
+	/// @notice maxSwapSlippage in 1e6 scale, e.g 1% 10000, 10% 100000, etc
+	function setSwapSlippage(uint24 _maxSwapSlippage) external onlyVaultManagers {
+		require(maxSwapSlippage <= basisOne, "STH"); // Slippage too high
+		maxSwapSlippage = _maxSwapSlippage;
 	}
 
 	function setDust(uint256 _dust, uint256 _rewardDust) external onlyVaultManagers {
