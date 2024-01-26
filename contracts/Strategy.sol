@@ -13,13 +13,15 @@ import { Math } from "./library/Math.sol";
 
 import { FullMath } from "../algebra/periphery/contracts/libraries/LiquidityAmounts.sol";
 import { IAlgebraPool } from "../algebra/core/contracts/interfaces/IAlgebraPool.sol";
-import { IAlgebraFactory } from "../algebra/core/contracts/interfaces/IAlgebraFactory.sol";
 import { TickMath } from "../algebra/core/contracts/libraries/TickMath.sol";
 import { ILpDepositor } from "../interfaces/ILpDepositor.sol";
-import { IThenaRouter } from "../interfaces/IThenaRouter.sol";
+import { IThenaRouter, route } from "../interfaces/IThenaRouter.sol";
 import { IUniV3Router } from "../interfaces/IUniV3Router.sol";
 import { IV1Pair } from "../interfaces/IThenaV1Pair.sol";
 
+/**
+ * @title Staretgy for the GHNY-WBNB pair on Thena V1
+ */
 contract Strategy is BaseStrategy {
 	using SafeERC20 for IERC20;
 	using Address for address;
@@ -34,6 +36,7 @@ contract Strategy is BaseStrategy {
 	 * {want} - Tokens that the strategy maximizes. IUniswapV2Pair tokens.
 	 */
 	address internal constant wbnb = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // WBNB
+	address internal constant ghny = address(0xa045E37a0D1dd3A45fefb8803D22457abc0A728a); // GHNY
 	address public constant thenaReward = address(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11); // THENA
 	address internal usdt = address(0x55d398326f99059fF775485246999027B3197955); // USDT
 
@@ -44,12 +47,8 @@ contract Strategy is BaseStrategy {
 	IAlgebraPool internal wbnbThePool = IAlgebraPool(0x51Bd5e6d3da9064D59BcaA5A76776560aB42cEb8);
 	IAlgebraPool internal usdtWbnbPool =
 		IAlgebraPool(0xD405b976Ac01023c9064024880999fC450A8668b);
-	IAlgebraPool internal wbnbToken0Pool;
-	IAlgebraPool internal wbnbToken1Pool;
 
 	IV1Pair public thenaLp;
-	IERC20 public token0;
-	IERC20 public token1;
 
 	uint256 public dust;
 	uint256 public rewardDust;
@@ -61,7 +60,6 @@ contract Strategy is BaseStrategy {
 
 	bool internal abandonRewards;
 
-	bool internal immutable isStable;
 	uint256 internal constant basisOne = 10000;
 	uint256 internal constant basisOnePool = 1000000;
 	uint256 internal constant MAX = type(uint256).max;
@@ -70,7 +68,7 @@ contract Strategy is BaseStrategy {
 	uint256 public minProfit;
 	bool internal forceHarvestTriggerOnce;
 
-	address internal constant voterTHE = 0x981B04CBDCEE0C510D331fAdc7D6836a77085030; // We send some extra THE here
+	address internal constant voterTHE = 0xE0f65652d6eA12324715007c59c39B336f4e4a06; // We send some extra THE here
 	uint256 public keepTHE; // Percentage of THE we re-lock for boost (in basis points)
 
 	constructor(
@@ -81,14 +79,6 @@ contract Strategy is BaseStrategy {
 		require(_thenaLp == address(want), "Wrong lpToken");
 
 		thenaLp = IV1Pair(_thenaLp);
-		isStable = thenaLp.isStable();
-
-		token0 = IERC20(thenaLp.token0());
-		token1 = IERC20(thenaLp.token1());
-
-		IAlgebraFactory factory = IAlgebraFactory(0x306F06C147f064A010530292A1EB6737c3e378e4);
-		wbnbToken0Pool = IAlgebraPool(factory.poolByPair(wbnb, address(token0)));
-		wbnbToken1Pool = IAlgebraPool(factory.poolByPair(wbnb, address(token1)));
 
 		maxSlippageIn = 1;
 		maxSlippageOut = 1;
@@ -285,11 +275,7 @@ contract Strategy is BaseStrategy {
 					recipient: address(this),
 					deadline: block.timestamp,
 					amountIn: thenaRewards,
-					amountOutMinimum: FullMath.mulDiv(
-						amountOut,
-						basisOnePool.sub(maxSwapSlippage),
-						basisOnePool
-					)
+					amountOutMinimum: amountOut
 				})
 			);
 		}
@@ -306,60 +292,34 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Swaps half of the wbnb for token0 and token1 and adds liquidity.
+	 *  Swaps half of the wbnb for ghny and adds liquidity.
 	 */
 	function _convertToLpToken() internal {
 		uint256 wbnbBalance = IERC20(wbnb).balanceOf(address(this));
 		uint256 amountIn = wbnbBalance.div(2);
-		uint256 amountOut;
-		bool zeroForOne;
 
-		if (wbnbBalance > 1e15) {
-			// If token0 or token1 is wbnb we skip the swap
-			if (address(token0) != wbnb) {
-				zeroForOne = address(wbnbToken0Pool.token0()) == wbnb;
-				amountOut = _getAmountOut(wbnbToken0Pool, zeroForOne, amountIn);
-				// 1/2 wbnb to token0
-				IUniV3Router(v3Router).exactInput(
-					IUniV3Router.ExactInputParams({
-						path: abi.encodePacked(wbnb, address(token0)),
-						recipient: address(this),
-						deadline: block.timestamp,
-						amountIn: amountIn,
-						amountOutMinimum: FullMath.mulDiv(
-							amountOut,
-							basisOnePool.sub(maxSwapSlippage),
-							basisOnePool
-						)
-					})
-				);
-			}
-			if (address(token1) != wbnb) {
-				zeroForOne = address(wbnbToken1Pool.token0()) == wbnb;
-				amountOut = _getAmountOut(wbnbToken1Pool, zeroForOne, amountIn);
-				// 1/2 wbnb to token1
-				IUniV3Router(v3Router).exactInput(
-					IUniV3Router.ExactInputParams({
-						path: abi.encodePacked(wbnb, address(token1)),
-						recipient: address(this),
-						deadline: block.timestamp,
-						amountIn: wbnbBalance.div(2),
-						amountOutMinimum: FullMath.mulDiv(
-							amountOut,
-							basisOnePool.sub(maxSwapSlippage),
-							basisOnePool
-						)
-					})
-				);
-			}
+		route[] memory wbnbToGhnyRoute = new route[](1);
+		wbnbToGhnyRoute[0] = route(wbnb, ghny, false);
+
+		uint256 amountOut = _getMinGhnyAmountOut(amountIn);
+
+		if (wbnbBalance > 1e15) {	
+			// 1/2 wbnb to token0
+			IThenaRouter(router).swapExactTokensForTokens(
+				amountIn,
+				amountOut,
+				wbnbToGhnyRoute,
+				address(this),
+				block.timestamp
+			);
 		}
 
 		// Add liquidity to build the LpToken
-		uint256 token0Balance = IERC20(token0).balanceOf(address(this));
-		uint256 token1Balance = IERC20(token1).balanceOf(address(this));
+		uint256 ghnyBalance = IERC20(ghny).balanceOf(address(this));
+		wbnbBalance = IERC20(wbnb).balanceOf(address(this));
 
-		if (token0Balance > 0 && token1Balance > 0) {
-			_addLiquidity(token0Balance, token1Balance);
+		if (ghnyBalance > 0 && wbnbBalance > 0) {
+			_addLiquidity(ghnyBalance, wbnbBalance);
 		}
 	}
 
@@ -369,15 +329,15 @@ contract Strategy is BaseStrategy {
 
 	/**
 	 * @notice
-	 *  Add liquidity to Thena.
+	 *  Add liquidity to Thena GHNY-WBNB pair.
 	 */
-	function _addLiquidity(uint256 token0Amount, uint256 token1Amount) internal {
+	function _addLiquidity(uint256 ghnyAmount, uint256 wbnbAmount) internal {
 		IThenaRouter(router).addLiquidity(
-			address(token0),
-			address(token1),
-			isStable,
-			token0Amount,
-			token1Amount,
+			ghny,
+			wbnb,
+			false,
+			ghnyAmount,
+			wbnbAmount,
 			0,
 			0,
 			address(this),
@@ -446,20 +406,26 @@ contract Strategy is BaseStrategy {
 		IERC20(address(thenaLp)).safeApprove(router, 0);
 		IERC20(address(thenaLp)).safeApprove(router, MAX);
 
+		IERC20(thenaReward).safeApprove(v3Router, 0);
+		IERC20(thenaReward).safeApprove(v3Router, MAX);
+
+		IERC20(ghny).safeApprove(router, 0);
+		IERC20(ghny).safeApprove(router, MAX);
+
 		IERC20(wbnb).safeApprove(router, 0);
 		IERC20(wbnb).safeApprove(router, MAX);
 
-		IERC20(thenaReward).safeApprove(router, 0);
-		IERC20(thenaReward).safeApprove(router, MAX);
-
-		IERC20(token0).safeApprove(router, 0);
-		IERC20(token0).safeApprove(router, MAX);
-
-		IERC20(token1).safeApprove(router, 0);
-		IERC20(token1).safeApprove(router, MAX);
 	}
 
-		/**
+	/**
+	 * @notice Gets min ghny amount from wbnb amount accepting maxSwapSlippage, based on the V1 pair TWAP
+	 * @param amountWbnb amount of wbnb
+	 */
+	function _getMinGhnyAmountOut(uint256 amountWbnb) internal view returns (uint256 amountGhny) {
+		amountGhny = FullMath.mulDiv(thenaLp.current(wbnb, amountWbnb), basisOnePool - maxSwapSlippage, basisOnePool);
+	}
+
+	/**
 	 * @notice Gets an out amount for a swap, based on the pool TWAP
 	 * @param pool The pool to use as a TWAP reference
 	 * @param zeroForOne Direction of the swap according to pool token order
@@ -481,9 +447,14 @@ contract Strategy is BaseStrategy {
 
 		uint256 priceX96 = FullMath.mulDiv(avgSqrtRatioX96, avgSqrtRatioX96, Q96);
 
+		uint256 priceX96WithSlippage =
+			zeroForOne
+				? FullMath.mulDiv(priceX96, basisOnePool - maxSwapSlippage, basisOnePool)
+				: FullMath.mulDiv(priceX96, basisOnePool + maxSwapSlippage, basisOnePool);
+
 		amountOut = zeroForOne
-			? FullMath.mulDiv(amountIn, priceX96, Q96)
-			: FullMath.mulDiv(amountIn, Q96, priceX96);
+			? FullMath.mulDiv(amountIn, priceX96WithSlippage, Q96)
+			: FullMath.mulDiv(amountIn, Q96, priceX96WithSlippage);
 	}
 
 	/**
@@ -577,7 +548,7 @@ contract Strategy is BaseStrategy {
 
 	/// @notice maxSwapSlippage in 1e6 scale, e.g 1% 10000, 10% 100000, etc
 	function setSwapSlippage(uint24 _maxSwapSlippage) external onlyVaultManagers {
-		require(maxSwapSlippage <= basisOne, "STH"); // Slippage too high
+		require(maxSwapSlippage <= basisOnePool, "STH"); // Slippage too high
 		maxSwapSlippage = _maxSwapSlippage;
 	}
 
