@@ -437,12 +437,12 @@ contract Strategy is BaseStrategy {
 		uint256 amountIn
 	) internal view returns (uint256 amountOut) {
 		uint32[] memory secondsAgo = new uint32[](2);
-		secondsAgo[0] = 20;
+		secondsAgo[0] = 60;
 		secondsAgo[1] = 0;
 
 		(int56[] memory tickCumulatives, , , ) = pool.getTimepoints(secondsAgo);
 
-		int24 avgTick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(20));
+		int24 avgTick = int24((tickCumulatives[1] - tickCumulatives[0]) / int56(60));
 		uint160 avgSqrtRatioX96 = avgTick.getSqrtRatioAtTick();
 
 		uint256 priceX96 = FullMath.mulDiv(avgSqrtRatioX96, avgSqrtRatioX96, Q96);
