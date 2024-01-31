@@ -35,18 +35,18 @@ contract Strategy is BaseStrategy {
 	 * {thenaLp} - LP Token for Thena exchange.
 	 * {want} - Tokens that the strategy maximizes. IUniswapV2Pair tokens.
 	 */
-	address internal constant wbnb = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // WBNB
-	address internal constant ghny = address(0xa045E37a0D1dd3A45fefb8803D22457abc0A728a); // GHNY
+	address public constant wbnb = address(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c); // WBNB
+	address public constant ghny = address(0xa045E37a0D1dd3A45fefb8803D22457abc0A728a); // GHNY
 	address public constant thenaReward = address(0xF4C8E32EaDEC4BFe97E0F595AdD0f4450a863a11); // THENA
-	address internal usdt = address(0x55d398326f99059fF775485246999027B3197955); // USDT
+	address public usdt = address(0x55d398326f99059fF775485246999027B3197955); // USDT
 
-	address internal v3Router = address(0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0); // AlgebraFinance Router
-	address public constant router = address(0x20a304a7d126758dfe6B243D0fc515F83bCA8431); // Thena Router
+	address public router = address(0x20a304a7d126758dfe6B243D0fc515F83bCA8431); // Thena Router
+	address public v3Router = address(0x327Dd3208f0bCF590A66110aCB6e5e6941A4EfA0); // AlgebraFinance Router
+
 	ILpDepositor public masterChef; // {masterChef} - Depositor contract for Thena
 
-	IAlgebraPool internal wbnbThePool = IAlgebraPool(0x51Bd5e6d3da9064D59BcaA5A76776560aB42cEb8);
-	IAlgebraPool internal usdtWbnbPool =
-		IAlgebraPool(0xD405b976Ac01023c9064024880999fC450A8668b);
+	IAlgebraPool private wbnbThePool = IAlgebraPool(0x51Bd5e6d3da9064D59BcaA5A76776560aB42cEb8);
+	IAlgebraPool private usdtWbnbPool = IAlgebraPool(0xD405b976Ac01023c9064024880999fC450A8668b);
 
 	IV1Pair public thenaLp;
 
@@ -58,17 +58,17 @@ contract Strategy is BaseStrategy {
 
 	uint24 public maxSwapSlippage;
 
-	bool internal abandonRewards;
+	bool private abandonRewards;
 
-	uint256 internal constant basisOne = 10000;
-	uint256 internal constant basisOnePool = 1000000;
-	uint256 internal constant MAX = type(uint256).max;
-	uint256 internal constant Q96 = 0x1000000000000000000000000;
+	uint256 private constant basisOne = 10000;
+	uint256 private constant basisOnePool = 1000000;
+	uint256 private constant MAX = type(uint256).max;
+	uint256 private constant Q96 = 0x1000000000000000000000000;
 
 	uint256 public minProfit;
-	bool internal forceHarvestTriggerOnce;
+	bool private forceHarvestTriggerOnce;
 
-	address internal constant voterTHE = 0xE0f65652d6eA12324715007c59c39B336f4e4a06; // We send some extra THE here
+	address private constant voterTHE = 0xE0f65652d6eA12324715007c59c39B336f4e4a06; // We send some extra THE here
 	uint256 public keepTHE; // Percentage of THE we re-lock for boost (in basis points)
 
 	constructor(
@@ -303,7 +303,7 @@ contract Strategy is BaseStrategy {
 
 		uint256 amountOut = _getMinGhnyAmountOut(amountIn);
 
-		if (wbnbBalance > 1e15) {	
+		if (wbnbBalance > 1e15) {
 			// 1/2 wbnb to token0
 			IThenaRouter(router).swapExactTokensForTokens(
 				amountIn,
@@ -414,15 +414,22 @@ contract Strategy is BaseStrategy {
 
 		IERC20(wbnb).safeApprove(router, 0);
 		IERC20(wbnb).safeApprove(router, MAX);
-
 	}
 
 	/**
 	 * @notice Gets min ghny amount from wbnb amount accepting maxSwapSlippage, based on the V1 pair TWAP
 	 * @param amountWbnb amount of wbnb
 	 */
-	function _getMinGhnyAmountOut(uint256 amountWbnb) internal view returns (uint256 amountGhny) {
-		amountGhny = FullMath.mulDiv(thenaLp.current(wbnb, amountWbnb), basisOnePool - maxSwapSlippage, basisOnePool);
+	function _getMinGhnyAmountOut(uint256 amountWbnb)
+		internal
+		view
+		returns (uint256 amountGhny)
+	{
+		amountGhny = FullMath.mulDiv(
+			thenaLp.current(wbnb, amountWbnb),
+			basisOnePool - maxSwapSlippage,
+			basisOnePool
+		);
 	}
 
 	/**
@@ -588,4 +595,3 @@ contract Strategy is BaseStrategy {
 
 	receive() external payable {}
 }
-
